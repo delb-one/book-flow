@@ -277,6 +277,10 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                     <span className="font-medium">Editore:</span>{" "}
                     {selectedBook.publisher || "-"}
                   </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Descrizione:</span>{" "}
+                    {selectedBook.description || "-"}
+                  </p>
 
                   <div className="flex flex-wrap gap-1">
                     {selectedBook.categories.map((category) => (
