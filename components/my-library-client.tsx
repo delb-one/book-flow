@@ -59,14 +59,15 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [authorFilter, setAuthorFilter] = useState("all");
   const [sortBy, setSortBy] = useState<SortBy>("recent");
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
 
   const uniqueCategories = useMemo(
     () => [...new Set(books.flatMap((book) => book.categories))].sort(),
-    [books]
+    [books],
   );
   const uniqueAuthors = useMemo(
     () => [...new Set(books.map((book) => book.author))].sort(),
-    [books]
+    [books],
   );
 
   const filteredBooks = useMemo(() => {
@@ -77,10 +78,15 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
         loweredQuery.length === 0 ||
         book.title.toLowerCase().includes(loweredQuery) ||
         book.author.toLowerCase().includes(loweredQuery) ||
-        book.categories.some((category) => category.toLowerCase().includes(loweredQuery));
-      const matchesStatus = statusFilter === "all" || book.status === statusFilter;
-      const matchesCategory = categoryFilter === "all" || book.categories.includes(categoryFilter);
-      const matchesAuthor = authorFilter === "all" || book.author === authorFilter;
+        book.categories.some((category) =>
+          category.toLowerCase().includes(loweredQuery),
+        );
+      const matchesStatus =
+        statusFilter === "all" || book.status === statusFilter;
+      const matchesCategory =
+        categoryFilter === "all" || book.categories.includes(categoryFilter);
+      const matchesAuthor =
+        authorFilter === "all" || book.author === authorFilter;
 
       return matchesQuery && matchesStatus && matchesCategory && matchesAuthor;
     });
@@ -96,10 +102,17 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
     return sorted;
   }, [authorFilter, books, categoryFilter, query, sortBy, statusFilter]);
 
+  const selectedBook = useMemo(
+    () => books.find((book) => book.id === selectedBookId) ?? null,
+    [books, selectedBookId],
+  );
+
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">La mia libreria</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">
+          La mia libreria
+        </h1>
         <p className="text-muted-foreground">
           Gestisci i tuoi libri con vista griglia o tabella.
         </p>
@@ -141,7 +154,9 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
             <select
               value={statusFilter}
-              onChange={(event) => setStatusFilter(event.target.value as StatusFilter)}
+              onChange={(event) =>
+                setStatusFilter(event.target.value as StatusFilter)
+              }
               className="border-input bg-background h-9 rounded-md border px-3 text-sm"
             >
               <option value="all">Stato: tutti</option>
@@ -209,6 +224,94 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
         </CardHeader>
 
         <CardContent className="pb-6">
+          {selectedBook && (
+            <div className="mb-5 rounded-lg border p-4">
+              <div className="mb-4 flex items-start justify-between gap-3">
+                <div>
+                  <p className="text-sm text-muted-foreground">Dettagli libro</p>
+                  <h2 className="text-xl font-semibold">{selectedBook.title}</h2>
+                  <p className="text-muted-foreground">{selectedBook.author}</p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedBookId(null)}
+                >
+                  Chiudi
+                </Button>
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-[140px_1fr]">
+                <div className="h-48 w-36 overflow-hidden rounded-md">
+                  {selectedBook.cover ? (
+                    <Image
+                      src={selectedBook.cover}
+                      alt={`Copertina di ${selectedBook.title}`}
+                      width={136}
+                      height={192}
+                      className="h-full w-full object-cover"
+                      unoptimized
+                    />
+                  ) : (
+                    <div
+                      className={`h-full w-full bg-linear-to-br ${toneClass[selectedBook.coverTone]}`}
+                    />
+                  )}
+                </div>
+
+                <div className="space-y-3">
+                  <div className="flex flex-wrap gap-2">
+                    <Badge variant={statusVariant[selectedBook.status]}>
+                      {statusLabel[selectedBook.status]}
+                    </Badge>
+                    <RatingStars rating={selectedBook.rating} />
+                  </div>
+
+                  <p className="text-sm">
+                    <span className="font-medium">Anno:</span>{" "}
+                    {selectedBook.year || "-"}{" "}
+                    <span className="ml-3 font-medium">Pagine:</span>{" "}
+                    {selectedBook.pages || "-"}
+                  </p>
+                  <p className="text-sm">
+                    <span className="font-medium">Editore:</span>{" "}
+                    {selectedBook.publisher || "-"}
+                  </p>
+
+                  <div className="flex flex-wrap gap-1">
+                    {selectedBook.categories.map((category) => (
+                      <Badge key={category} variant="outline">
+                        {category}
+                      </Badge>
+                    ))}
+                  </div>
+
+                  {selectedBook.description && (
+                    <p className="text-sm text-muted-foreground">
+                      {selectedBook.description}
+                    </p>
+                  )}
+
+                  {selectedBook.status === "reading" && (
+                    <div className="space-y-1">
+                      <Progress value={selectedBook.progress} />
+                      <p className="text-xs text-muted-foreground">
+                        {selectedBook.progress}% completato
+                      </p>
+                    </div>
+                  )}
+
+                  {selectedBook.notes && (
+                    <p className="rounded-md bg-muted/40 p-2 text-sm">
+                      <span className="font-medium">Note:</span>{" "}
+                      {selectedBook.notes}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+
           {filteredBooks.length === 0 && (
             <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
               Nessun libro corrisponde ai filtri selezionati.
@@ -222,39 +325,53 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                   key={book.id}
                   className="bg-card rounded-lg border p-3 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm"
                 >
-                  <div className="mb-3 h-44 w-full overflow-hidden rounded-md">
-                    {book.cover ? (
-                      <Image
-                        src={book.cover}
-                        alt={`Copertina di ${book.title}`}
-                        width={256}
-                        height={352}
-                        className="h-full w-full object-cover"
-                        unoptimized
-                      />
-                    ) : (
-                      <div className={`h-full w-full bg-linear-to-br ${toneClass[book.coverTone]}`} />
-                    )}
-                  </div>
-                  <p className="line-clamp-1 font-medium">{book.title}</p>
-                  <p className="text-muted-foreground mb-2 text-sm">{book.author}</p>
-                  <div className="mb-2 flex items-center justify-between">
-                    <Badge variant={statusVariant[book.status]}>{statusLabel[book.status]}</Badge>
-                    <RatingStars rating={book.rating} />
-                  </div>
-                  <div className="mb-2 flex flex-wrap gap-1">
-                    {book.categories.slice(0, 2).map((category) => (
-                      <Badge key={category} variant="outline">
-                        {category}
-                      </Badge>
-                    ))}
-                  </div>
-                  {book.status === "reading" && (
-                    <div className="space-y-1">
-                      <Progress value={book.progress} />
-                      <p className="text-muted-foreground text-xs">{book.progress}% completato</p>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedBookId(book.id)}
+                    className="w-full text-left"
+                  >
+                    <div className="mb-3 h-44 w-full overflow-hidden rounded-md">
+                      {book.cover ? (
+                        <Image
+                          src={book.cover}
+                          alt={`Copertina di ${book.title}`}
+                          width={256}
+                          height={352}
+                          className="h-full w-full object-cover"
+                          unoptimized
+                        />
+                      ) : (
+                        <div
+                          className={`h-full w-full bg-linear-to-br ${toneClass[book.coverTone]}`}
+                        />
+                      )}
                     </div>
-                  )}
+                    <p className="line-clamp-1 font-medium">{book.title}</p>
+                    <p className="text-muted-foreground mb-2 text-sm">
+                      {book.author}
+                    </p>
+                    <div className="mb-2 flex items-center justify-between">
+                      <Badge variant={statusVariant[book.status]}>
+                        {statusLabel[book.status]}
+                      </Badge>
+                      <RatingStars rating={book.rating} />
+                    </div>
+                    <div className="mb-2 flex flex-wrap gap-1">
+                      {book.categories.slice(0, 2).map((category) => (
+                        <Badge key={category} variant="outline">
+                          {category}
+                        </Badge>
+                      ))}
+                    </div>
+                    {book.status === "reading" && (
+                      <div className="space-y-1">
+                        <Progress value={book.progress} />
+                        <p className="text-muted-foreground text-xs">
+                          {book.progress}% completato
+                        </p>
+                      </div>
+                    )}
+                  </button>
                 </article>
               ))}
             </div>
@@ -289,13 +406,17 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                               unoptimized
                             />
                           ) : (
-                            <div className={`h-full w-full bg-linear-to-br ${toneClass[book.coverTone]}`} />
+                            <div
+                              className={`h-full w-full bg-linear-to-br ${toneClass[book.coverTone]}`}
+                            />
                           )}
                         </div>
                       </td>
                       <td className="px-3 py-2">
                         <p className="font-medium">{book.title}</p>
-                        <p className="text-muted-foreground text-xs">{book.year || "-"}</p>
+                        <p className="text-muted-foreground text-xs">
+                          {book.year || "-"}
+                        </p>
                       </td>
                       <td className="px-3 py-2">{book.author}</td>
                       <td className="px-3 py-2">
@@ -311,10 +432,16 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                         <RatingStars rating={book.rating} />
                       </td>
                       <td className="px-3 py-2">
-                        <Badge variant={statusVariant[book.status]}>{statusLabel[book.status]}</Badge>
+                        <Badge variant={statusVariant[book.status]}>
+                          {statusLabel[book.status]}
+                        </Badge>
                       </td>
                       <td className="px-3 py-2">
-                        <Button variant="ghost" size="sm">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedBookId(book.id)}
+                        >
                           Dettagli
                         </Button>
                       </td>
@@ -329,4 +456,3 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
     </div>
   );
 }
-

@@ -74,23 +74,25 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <main className="flex min-h-0 flex-col">
           <header className="bg-background/95 supports-backdrop-filter:bg-background/75 sticky top-0 z-20 border-b p-4 backdrop-blur md:px-8 md:py-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div className="relative w-full max-w-xl">
-              <Search className="text-muted-foreground absolute top-1/2 left-2 size-4 -translate-y-1/2" />
-              <Input className="pl-8" placeholder="Cerca libri, autori, categorie..." />
-            </div>
-            <div className="flex items-center gap-2">
-              <Button asChild>
-                <Link href="/discover">
-                  <Plus className="size-4" />
-                  Aggiungi libro
-                </Link>
-              </Button>
-              <ModeToggle />
-            </div>
+              <div className="relative w-full max-w-xl">
+                {/* <Search className="text-muted-foreground absolute top-1/2 left-2 size-4 -translate-y-1/2" />
+              <Input className="pl-8" placeholder="Cerca libri, autori, categorie..." /> */}
+              </div>
+              <div className="flex items-center gap-2">
+                <Button asChild>
+                  <Link href="/discover">
+                    <Plus className="size-4" />
+                    Aggiungi libro
+                  </Link>
+                </Button>
+                <ModeToggle />
+              </div>
             </div>
           </header>
 
-          <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-8">{children}</div>
+          <div className="min-h-0 flex-1 overflow-y-auto p-4 md:p-8">
+            {children}
+          </div>
         </main>
       </div>
     </div>
