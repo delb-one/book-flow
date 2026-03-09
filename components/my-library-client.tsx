@@ -262,7 +262,7 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
 
           {filteredBooks.length > 0 && viewMode === "table" && (
             <div className="overflow-x-auto rounded-lg border">
-              <table className="w-full min-w-[920px] text-left text-sm">
+              <table className="w-full min-w-230 text-left text-sm">
                 <thead className="bg-muted/60">
                   <tr>
                     <th className="px-3 py-2 font-medium">Copertina</th>

@@ -8,6 +8,8 @@ import {
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { getLibraryBooks } from "@/lib/library-data";
+import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const toneClass: Record<string, string> = {
   amber: "from-amber-200 to-amber-400",
@@ -87,8 +89,20 @@ export default async function Home() {
                 className="flex items-center gap-4 rounded-lg border p-3"
               >
                 <div
-                  className={`h-16 w-12 rounded-md bg-linear-to-br ${toneClass[book.coverTone]}`}
-                />
+                  className={cn(
+                    "h-14 w-10 rounded bg-linear-to-br",
+                    book.cover !== null ? book.coverTone : "",
+                  )}
+                >
+                  {book.cover && (
+                    <Image
+                      src={book.cover}
+                      alt={`Copertina di ${book.title}`}
+                      width={40}
+                      height={56}
+                    />
+                  )}
+                </div>
                 <div className="min-w-0 flex-1">
                   <div className="mb-1 flex flex-wrap items-center gap-2">
                     <p className="truncate font-medium">{book.title}</p>
@@ -123,8 +137,20 @@ export default async function Home() {
                 className="flex items-center gap-3 rounded-lg border p-3"
               >
                 <div
-                  className={`h-14 w-10 rounded bg-linear-to-br ${toneClass[book.coverTone]}`}
-                />
+                  className={cn(
+                    "h-14 w-10 rounded bg-linear-to-br",
+                    book.cover !== null ? book.coverTone : "",
+                  )}
+                >
+                  {book.cover && (
+                    <Image
+                      src={book.cover}
+                      alt={`Copertina di ${book.title}`}
+                      width={40}
+                      height={56}
+                    />
+                  )}
+                </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-medium">{book.title}</p>
                   <p className="text-muted-foreground truncate text-xs">
