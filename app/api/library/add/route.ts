@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import type { PostgrestError } from "@supabase/supabase-js";
+import { revalidateTag } from "next/cache";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
@@ -159,6 +160,8 @@ export async function POST(request: NextRequest) {
         status: 500,
       });
     }
+
+    revalidateTag("library-books");
 
     return NextResponse.json({ ok: true, alreadyInLibrary: false });
   } catch (error) {

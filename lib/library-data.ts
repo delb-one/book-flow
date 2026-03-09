@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
 
 export type ReadingStatus = "unread" | "reading" | "read";
 
@@ -31,92 +32,77 @@ function toneFromSeed(seed: string): LibraryBook["coverTone"] {
   return tones[hash % tones.length];
 }
 
-type LibraryRow = {
-  book_id: string;
+type LibraryJoinedRow = {
+  book_id: string | null;
   status: ReadingStatus | null;
   progress: number | null;
   rating: number | null;
   notes: string | null;
   added_at: string | null;
+  books:
+    | {
+        id: string;
+        title: string | null;
+        year: number | null;
+        publisher: string | null;
+        pages: number | null;
+        description: string | null;
+        cover: string | null;
+        categories: string[] | null;
+        authors:
+          | {
+              name: string | null;
+              slug: string | null;
+            }
+          | {
+              name: string | null;
+              slug: string | null;
+            }[]
+          | null;
+      }
+    | null;
 };
 
-type BookRow = {
-  id: string;
-  title: string | null;
-  author_id: string | null;
-  year: number | null;
-  publisher: string | null;
-  pages: number | null;
-  description: string | null;
-  cover: string | null;
-  categories: string[] | null;
-};
-
-type AuthorRow = {
-  id: string;
-  name: string | null;
-  slug: string | null;
-};
-
-export async function getLibraryBooks(): Promise<LibraryBook[]> {
+async function fetchLibraryBooks(): Promise<LibraryBook[]> {
   const supabase = createServerSupabaseClient();
 
-  const { data: libraryRows, error: libraryError } = await supabase
+  const { data, error } = await supabase
     .from("library_books")
-    .select("book_id,status,progress,rating,notes,added_at")
+    .select(
+      `
+      book_id,
+      status,
+      progress,
+      rating,
+      notes,
+      added_at,
+      books:books!library_books_book_id_fkey(
+        id,
+        title,
+        year,
+        publisher,
+        pages,
+        description,
+        cover,
+        categories,
+        authors:authors!books_author_id_fkey(name,slug)
+      )
+    `
+    )
     .order("added_at", { ascending: false });
 
-  if (libraryError) {
-    throw new Error(`library_books query failed: ${libraryError.message}`);
+  if (error) {
+    throw new Error(`library_books joined query failed: ${error.message}`);
   }
 
-  const rows = (libraryRows ?? []) as LibraryRow[];
+  const rows = (data ?? []) as LibraryJoinedRow[];
   if (rows.length === 0) return [];
-
-  const bookIds = [...new Set(rows.map((row) => row.book_id))];
-  const { data: booksRows, error: booksError } = await supabase
-    .from("books")
-    .select("id,title,author_id,year,publisher,pages,description,cover,categories")
-    .in("id", bookIds);
-
-  if (booksError) {
-    throw new Error(`books query failed: ${booksError.message}`);
-  }
-
-  const books = (booksRows ?? []) as BookRow[];
-  const bookById = new Map(books.map((book) => [book.id, book]));
-
-  const authorIds = [
-    ...new Set(
-      books
-        .map((book) => book.author_id)
-        .filter((authorId): authorId is string => Boolean(authorId))
-    ),
-  ];
-
-  const authorById = new Map<string, AuthorRow>();
-
-  if (authorIds.length > 0) {
-    const { data: authorsRows, error: authorsError } = await supabase
-      .from("authors")
-      .select("id,name,slug")
-      .in("id", authorIds);
-
-    if (authorsError) {
-      throw new Error(`authors query failed: ${authorsError.message}`);
-    }
-
-    for (const author of (authorsRows ?? []) as AuthorRow[]) {
-      authorById.set(author.id, author);
-    }
-  }
 
   return rows
     .map((row) => {
-      const book = bookById.get(row.book_id);
+      const book = row.books;
       if (!book) return null;
-
-      const author = book.author_id ? authorById.get(book.author_id) : null;
+      const author = Array.isArray(book.authors) ? book.authors[0] : book.authors;
 
       return {
         id: book.id,
@@ -140,3 +126,11 @@ export async function getLibraryBooks(): Promise<LibraryBook[]> {
     .filter((book): book is LibraryBook => Boolean(book));
 }
 
+const getLibraryBooksCached = unstable_cache(fetchLibraryBooks, ["library-books"], {
+  tags: ["library-books"],
+  revalidate: 60,
+});
+
+export async function getLibraryBooks(): Promise<LibraryBook[]> {
+  return getLibraryBooksCached();
+}

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect } from "react";
 import {
   BarChart3,
   BookCopy,
@@ -28,6 +29,15 @@ const navItems = [
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    for (const item of navItems) {
+      if (item.href !== "#") {
+        router.prefetch(item.href);
+      }
+    }
+  }, [router]);
 
   return (
     <div className="bg-background h-screen overflow-hidden">
