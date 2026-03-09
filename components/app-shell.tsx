@@ -21,7 +21,7 @@ const navItems = [
   { label: "Dashboard", icon: BookOpen, href: "/" },
   { label: "La mia libreria", icon: BookCopy, href: "/my-library" },
   { label: "Scopri libri", icon: Compass, href: "#" },
-  { label: "Autori", icon: Users, href: "#" },
+  { label: "Autori", icon: Users, href: "/authors" },
   { label: "Statistiche lettura", icon: BarChart3, href: "#" },
   { label: "Impostazioni", icon: Settings, href: "#" },
 ];
@@ -39,7 +39,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
           <nav className="space-y-1">
             {navItems.map((item) => {
-              const isActive = item.href !== "#" && pathname === item.href;
+              const isActive =
+                item.href !== "#" &&
+                (pathname === item.href ||
+                  (item.href !== "/" && pathname.startsWith(`${item.href}/`)));
 
               return (
                 <Button
@@ -59,7 +62,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </aside>
 
         <main className="flex min-h-0 flex-col">
-          <header className="bg-background/95 supports-backdrop-filter:bg-background/75 sticky top-0 z-20 border-b p-4 backdrop-blur md:px-8 md:py-4">
+          <header className="bg-background/95 supports-[backdrop-filter]:bg-background/75 sticky top-0 z-20 border-b p-4 backdrop-blur md:px-8 md:py-4">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
             <div className="relative w-full max-w-xl">
               <Search className="text-muted-foreground absolute top-1/2 left-2 size-4 -translate-y-1/2" />
