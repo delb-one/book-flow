@@ -20,7 +20,7 @@ import { Input } from "@/components/ui/input";
 const navItems = [
   { label: "Dashboard", icon: BookOpen, href: "/" },
   { label: "La mia libreria", icon: BookCopy, href: "/my-library" },
-  { label: "Scopri libri", icon: Compass, href: "#" },
+  { label: "Scopri libri", icon: Compass, href: "/discover" },
   { label: "Autori", icon: Users, href: "/authors" },
   { label: "Statistiche lettura", icon: BarChart3, href: "#" },
   { label: "Impostazioni", icon: Settings, href: "#" },
@@ -69,9 +69,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <Input className="pl-8" placeholder="Cerca libri, autori, categorie..." />
             </div>
             <div className="flex items-center gap-2">
-              <Button>
-                <Plus className="size-4" />
-                Aggiungi libro
+              <Button asChild>
+                <Link href="/discover">
+                  <Plus className="size-4" />
+                  Aggiungi libro
+                </Link>
               </Button>
               <ModeToggle />
             </div>

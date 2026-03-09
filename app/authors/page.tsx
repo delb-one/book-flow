@@ -4,7 +4,7 @@ import { ArrowRight, BookOpen } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { books } from "@/lib/mock-data";
+import { getLibraryBooks } from "@/lib/library-data";
 
 const toneClass: Record<string, string> = {
   amber: "from-amber-200 to-amber-400",
@@ -15,24 +15,25 @@ const toneClass: Record<string, string> = {
   slate: "from-slate-200 to-slate-500",
 };
 
-const authors = Object.values(
-  books.reduce<
-    Record<string, { slug: string; name: string; books: typeof books }>
-  >((acc, book) => {
-    if (!acc[book.authorSlug]) {
-      acc[book.authorSlug] = {
-        slug: book.authorSlug,
-        name: book.author,
-        books: [],
-      };
-    }
+export default async function AuthorsPage() {
+  const books = await getLibraryBooks();
+  const authors = Object.values(
+    books.reduce<
+      Record<string, { slug: string; name: string; books: typeof books }>
+    >((acc, book) => {
+      if (!acc[book.authorSlug]) {
+        acc[book.authorSlug] = {
+          slug: book.authorSlug,
+          name: book.author,
+          books: [],
+        };
+      }
 
-    acc[book.authorSlug].books.push(book);
-    return acc;
-  }, {})
-).sort((a, b) => a.name.localeCompare(b.name));
+      acc[book.authorSlug].books.push(book);
+      return acc;
+    }, {})
+  ).sort((a, b) => a.name.localeCompare(b.name));
 
-export default function AuthorsPage() {
   return (
     <div className="mx-auto max-w-7xl space-y-6">
       <header className="space-y-2">

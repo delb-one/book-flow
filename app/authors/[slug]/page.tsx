@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { books } from "@/lib/mock-data";
+import { getLibraryBooks } from "@/lib/library-data";
 
 const toneClass: Record<string, string> = {
   amber: "from-amber-200 to-amber-400",
@@ -34,6 +34,7 @@ export default async function AuthorDetailsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
+  const books = await getLibraryBooks();
   const authorBooks = books.filter((book) => book.authorSlug === slug);
 
   if (authorBooks.length === 0) {

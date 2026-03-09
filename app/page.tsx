@@ -7,7 +7,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { books, stats } from "@/lib/mock-data";
+import { getLibraryBooks } from "@/lib/library-data";
 
 const toneClass: Record<string, string> = {
   amber: "from-amber-200 to-amber-400",
@@ -17,11 +17,6 @@ const toneClass: Record<string, string> = {
   cyan: "from-cyan-200 to-cyan-500",
   slate: "from-slate-200 to-slate-500",
 };
-
-const currentlyReading = books.filter((book) => book.status === "reading");
-const recentlyAdded = [...books]
-  .sort((a, b) => (a.addedAt < b.addedAt ? 1 : -1))
-  .slice(0, 5);
 
 const statusVariant = {
   unread: "muted",
@@ -35,7 +30,19 @@ const statusLabel = {
   read: "Letto",
 } as const;
 
-export default function Home() {
+export default async function Home() {
+  const books = await getLibraryBooks();
+  const stats = {
+    total: books.length,
+    read: books.filter((book) => book.status === "read").length,
+    reading: books.filter((book) => book.status === "reading").length,
+    unread: books.filter((book) => book.status === "unread").length,
+  };
+  const currentlyReading = books.filter((book) => book.status === "reading");
+  const recentlyAdded = [...books]
+    .sort((a, b) => (a.addedAt < b.addedAt ? 1 : -1))
+    .slice(0, 5);
+
   return (
     <>
       <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
