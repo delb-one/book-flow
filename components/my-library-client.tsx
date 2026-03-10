@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
-import { Grid3X3, List, Search, Star } from "lucide-react";
+import { ArrowUpDown, Grid3X3, List, Search, Star, Tag, User, SlidersHorizontal } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,13 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { LibraryBook, ReadingStatus } from "@/lib/library-data";
 import { BookDetailsModal } from "./book-details-modal";
 
@@ -156,56 +163,84 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
             </div>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-            <select
-              value={statusFilter}
-              onChange={(event) =>
-                setStatusFilter(event.target.value as StatusFilter)
-              }
-              className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-            >
-              <option value="all">Stato: tutti</option>
-              <option value="unread">Da leggere</option>
-              <option value="reading">In lettura</option>
-              <option value="read">Letto</option>
-            </select>
+          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+            <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-1 lg:flex-wrap lg:items-center">
+              <Select
+                value={statusFilter}
+                onValueChange={(value) =>
+                  setStatusFilter(value as StatusFilter)
+                }
+              >
+                <SelectTrigger className="lg:w-50">
+                  <SlidersHorizontal className="size-4 text-muted-foreground" />
+                  <SelectValue placeholder="Stato" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Stato: tutti</SelectItem>
+                  <SelectItem value="unread">Da leggere</SelectItem>
+                  <SelectItem value="reading">In lettura</SelectItem>
+                  <SelectItem value="read">Letto</SelectItem>
+                </SelectContent>
+              </Select>
 
-            <select
-              value={categoryFilter}
-              onChange={(event) => setCategoryFilter(event.target.value)}
-              className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-            >
-              <option value="all">Categoria: tutte</option>
-              {uniqueCategories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
+              <Select
+                value={categoryFilter}
+                onValueChange={(value) => setCategoryFilter(value)}
+              >
+                <SelectTrigger className="lg:w-50">
+                  <Tag className="size-4 text-muted-foreground" />
+                  <SelectValue placeholder="Categoria" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Categoria: tutte</SelectItem>
+                  {uniqueCategories.map((category) => (
+                    <SelectItem key={category} value={category}>
+                      {category}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            <select
-              value={authorFilter}
-              onChange={(event) => setAuthorFilter(event.target.value)}
-              className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-            >
-              <option value="all">Autore: tutti</option>
-              {uniqueAuthors.map((author) => (
-                <option key={author} value={author}>
-                  {author}
-                </option>
-              ))}
-            </select>
+              <Select
+                value={authorFilter}
+                onValueChange={(value) => setAuthorFilter(value)}
+              >
+                <SelectTrigger className="lg:w-50">
+                  <User className="size-4 text-muted-foreground" />
+                  <SelectValue placeholder="Autore" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Autore: tutti</SelectItem>
+                  {uniqueAuthors.map((author) => (
+                    <SelectItem key={author} value={author}>
+                      {author}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-            <select
-              value={sortBy}
-              onChange={(event) => setSortBy(event.target.value as SortBy)}
-              className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-            >
-              <option value="recent">Ordina: aggiunti di recente</option>
-              <option value="title">Ordina: titolo</option>
-              <option value="rating">Ordina: valutazione</option>
-              <option value="year">Ordina: anno pubblicazione</option>
-            </select>
+            <div className="lg:shrink-0">
+              <Select
+                value={sortBy}
+                onValueChange={(value) => setSortBy(value as SortBy)}
+              >
+                <SelectTrigger className="lg:w-60">
+                  <ArrowUpDown className="size-4 text-muted-foreground" />
+                  <SelectValue placeholder="Ordina" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">
+                    Ordina: aggiunti di recente
+                  </SelectItem>
+                  <SelectItem value="title">Ordina: titolo</SelectItem>
+                  <SelectItem value="rating">Ordina: valutazione</SelectItem>
+                  <SelectItem value="year">
+                    Ordina: anno pubblicazione
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <div className="flex items-center justify-between gap-2">
