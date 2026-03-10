@@ -7,15 +7,17 @@ import { Grid3X3, List, Search, Star } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
 import type { LibraryBook, ReadingStatus } from "@/lib/library-data";
+import { BookDetailsModal } from "./book-details-modal";
 
 type ViewMode = "grid" | "table";
 type StatusFilter = "all" | ReadingStatus;
 type SortBy = "recent" | "title" | "rating" | "year";
 
-const toneClass: Record<string, string> = {
+export const toneClass: Record<string, string> = {
   amber: "from-amber-200 to-amber-400",
   emerald: "from-emerald-200 to-emerald-500",
   rose: "from-rose-200 to-rose-500",
@@ -24,19 +26,22 @@ const toneClass: Record<string, string> = {
   slate: "from-slate-200 to-slate-500",
 };
 
-const statusLabel: Record<ReadingStatus, string> = {
+export const statusLabel: Record<ReadingStatus, string> = {
   unread: "Da leggere",
   reading: "In lettura",
   read: "Letto",
 };
 
-const statusVariant: Record<ReadingStatus, "muted" | "warning" | "success"> = {
+export const statusVariant: Record<
+  ReadingStatus,
+  "muted" | "warning" | "success"
+> = {
   unread: "muted",
   reading: "warning",
   read: "success",
 };
 
-function RatingStars({ rating }: { rating: number }) {
+export function RatingStars({ rating }: { rating: number }) {
   return (
     <div className="flex items-center gap-0.5">
       {Array.from({ length: 5 }, (_, index) => {
@@ -224,97 +229,10 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
         </CardHeader>
 
         <CardContent className="pb-6">
-          {selectedBook && (
-            <div className="mb-5 rounded-lg border p-4">
-              <div className="mb-4 flex items-start justify-between gap-3">
-                <div>
-                  <p className="text-sm text-muted-foreground">Dettagli libro</p>
-                  <h2 className="text-xl font-semibold">{selectedBook.title}</h2>
-                  <p className="text-muted-foreground">{selectedBook.author}</p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setSelectedBookId(null)}
-                >
-                  Chiudi
-                </Button>
-              </div>
-
-              <div className="grid gap-4 md:grid-cols-[140px_1fr]">
-                <div className="h-48 w-36 overflow-hidden rounded-md">
-                  {selectedBook.cover ? (
-                    <Image
-                      src={selectedBook.cover}
-                      alt={`Copertina di ${selectedBook.title}`}
-                      width={136}
-                      height={192}
-                      className="h-full w-full object-cover"
-                      unoptimized
-                    />
-                  ) : (
-                    <div
-                      className={`h-full w-full bg-linear-to-br ${toneClass[selectedBook.coverTone]}`}
-                    />
-                  )}
-                </div>
-
-                <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    <Badge variant={statusVariant[selectedBook.status]}>
-                      {statusLabel[selectedBook.status]}
-                    </Badge>
-                    <RatingStars rating={selectedBook.rating} />
-                  </div>
-
-                  <p className="text-sm">
-                    <span className="font-medium">Anno:</span>{" "}
-                    {selectedBook.year || "-"}{" "}
-                    <span className="ml-3 font-medium">Pagine:</span>{" "}
-                    {selectedBook.pages || "-"}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Editore:</span>{" "}
-                    {selectedBook.publisher || "-"}
-                  </p>
-                  <p className="text-sm">
-                    <span className="font-medium">Descrizione:</span>{" "}
-                    {selectedBook.description || "-"}
-                  </p>
-
-                  <div className="flex flex-wrap gap-1">
-                    {selectedBook.categories.map((category) => (
-                      <Badge key={category} variant="outline">
-                        {category}
-                      </Badge>
-                    ))}
-                  </div>
-
-                  {selectedBook.description && (
-                    <p className="text-sm text-muted-foreground">
-                      {selectedBook.description}
-                    </p>
-                  )}
-
-                  {selectedBook.status === "reading" && (
-                    <div className="space-y-1">
-                      <Progress value={selectedBook.progress} />
-                      <p className="text-xs text-muted-foreground">
-                        {selectedBook.progress}% completato
-                      </p>
-                    </div>
-                  )}
-
-                  {selectedBook.notes && (
-                    <p className="rounded-md bg-muted/40 p-2 text-sm">
-                      <span className="font-medium">Note:</span>{" "}
-                      {selectedBook.notes}
-                    </p>
-                  )}
-                </div>
-              </div>
-            </div>
-          )}
+          <BookDetailsModal
+            selectedBook={selectedBook}
+            setSelectedBookId={setSelectedBookId}
+          />
 
           {filteredBooks.length === 0 && (
             <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
