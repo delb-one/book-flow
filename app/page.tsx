@@ -59,7 +59,7 @@ export default async function Home() {
                   {stats.total}
                 </CardTitle>
               </div>
-              <Book className="h-5 w-5 text-muted-foreground" aria-hidden />
+              <Book className="size-5 text-primary" aria-hidden />
             </div>
           </CardHeader>
         </Card>
@@ -72,7 +72,7 @@ export default async function Home() {
                   {stats.read}
                 </CardTitle>
               </div>
-              <BookCheck className="h-5 w-5 text-muted-foreground" aria-hidden />
+              <BookCheck className="size-5 text-primary" aria-hidden />
             </div>
           </CardHeader>
         </Card>
@@ -85,7 +85,7 @@ export default async function Home() {
                   {stats.reading}
                 </CardTitle>
               </div>
-              <BookOpen className="h-5 w-5 text-muted-foreground" aria-hidden />
+              <BookOpen className="size-5 text-primary" aria-hidden />
             </div>
           </CardHeader>
         </Card>
@@ -98,7 +98,7 @@ export default async function Home() {
                   {stats.unread}
                 </CardTitle>
               </div>
-              <Bookmark className="h-5 w-5 text-muted-foreground" aria-hidden />
+              <Bookmark className="size-5 text-primary" aria-hidden />
             </div>
           </CardHeader>
         </Card>
