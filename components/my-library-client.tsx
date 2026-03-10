@@ -113,7 +113,7 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
   );
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto w-full space-y-6">
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">
           La mia libreria
