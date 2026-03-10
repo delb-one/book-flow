@@ -250,7 +250,7 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                   <button
                     type="button"
                     onClick={() => setSelectedBookId(book.id)}
-                    className="w-full text-left"
+                    className="w-full text-left cursor-pointer"
                   >
                     <div className="mb-3 h-44 w-full overflow-hidden rounded-md">
                       {book.cover ? (

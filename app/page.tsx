@@ -1,15 +1,15 @@
-import { Badge } from "@/components/ui/badge";
+import { BookReadingCard } from "@/components/my-library/book-reading-card";
+import { BookSmallCard } from "@/components/my-library/book-small-card";
+import { SectionHeader } from "@/components/my-library/section-header";
+import { Button } from "@/components/ui/button";
 import {
   Card,
-  CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
 import { getLibraryBooks } from "@/lib/library-data";
-import { cn } from "@/lib/utils";
-import Image from "next/image";
+import { Book, BookCheck, BookOpen, Bookmark } from "lucide-react";
 
 const toneClass: Record<string, string> = {
   amber: "from-amber-200 to-amber-400",
@@ -20,13 +20,13 @@ const toneClass: Record<string, string> = {
   slate: "from-slate-200 to-slate-500",
 };
 
-const statusVariant = {
+export const statusVariant = {
   unread: "muted",
   reading: "warning",
   read: "success",
 } as const;
 
-const statusLabel = {
+export const statusLabel = {
   unread: "Da leggere",
   reading: "In lettura",
   read: "Letto",
@@ -47,120 +47,92 @@ export default async function Home() {
 
   return (
     <>
-      <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <section className="mb-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Libri totali</CardDescription>
-            <CardTitle>{stats.total}</CardTitle>
+          <CardHeader>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <CardDescription className="text-sm">
+                  Libri totali
+                </CardDescription>
+                <CardTitle className="font-bold text-2xl">
+                  {stats.total}
+                </CardTitle>
+              </div>
+              <Book className="h-5 w-5 text-muted-foreground" aria-hidden />
+            </div>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Libri letti</CardDescription>
-            <CardTitle>{stats.read}</CardTitle>
+          <CardHeader>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <CardDescription className="text-sm">Libri letti</CardDescription>
+                <CardTitle className="font-bold text-2xl">
+                  {stats.read}
+                </CardTitle>
+              </div>
+              <BookCheck className="h-5 w-5 text-muted-foreground" aria-hidden />
+            </div>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>In lettura</CardDescription>
-            <CardTitle>{stats.reading}</CardTitle>
+          <CardHeader>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <CardDescription className="text-sm">In lettura</CardDescription>
+                <CardTitle className="font-bold text-2xl">
+                  {stats.reading}
+                </CardTitle>
+              </div>
+              <BookOpen className="h-5 w-5 text-muted-foreground" aria-hidden />
+            </div>
           </CardHeader>
         </Card>
         <Card>
-          <CardHeader className="pb-2">
-            <CardDescription>Da leggere</CardDescription>
-            <CardTitle>{stats.unread}</CardTitle>
+          <CardHeader>
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <CardDescription className="text-sm">Da leggere</CardDescription>
+                <CardTitle className="font-bold text-2xl">
+                  {stats.unread}
+                </CardTitle>
+              </div>
+              <Bookmark className="h-5 w-5 text-muted-foreground" aria-hidden />
+            </div>
           </CardHeader>
         </Card>
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-[1.3fr_1fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>In lettura</CardTitle>
-            <CardDescription>
-              Tieni traccia dei progressi dei libri in corso
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4 pb-6">
-            {currentlyReading.map((book) => (
-              <div
-                key={book.id}
-                className="flex items-center gap-4 rounded-lg border p-3"
-              >
-                <div
-                  className={cn(
-                    "h-14 w-10 rounded bg-linear-to-br",
-                    book.cover !== null ? book.coverTone : "",
-                  )}
-                >
-                  {book.cover && (
-                    <Image
-                      src={book.cover}
-                      alt={`Copertina di ${book.title}`}
-                      width={40}
-                      height={56}
-                    />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex flex-wrap items-center gap-2">
-                    <p className="truncate font-medium">{book.title}</p>
-                    <Badge variant={statusVariant[book.status]}>
-                      {statusLabel[book.status]}
-                    </Badge>
-                  </div>
-                  <p className="text-muted-foreground mb-2 text-sm">
-                    {book.author}
-                  </p>
-                  <Progress value={book.progress} />
-                </div>
-                <span className="text-muted-foreground text-sm">
-                  {book.progress}%
-                </span>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+      <section className="flex flex-col gap-6">
+        <SectionHeader
+          title="In lettura"
+          description="Tieni traccia dei progressi dei libri in corso"
+          badge={currentlyReading.length}
+          book={{status: "reading"}}
+        />
 
-        <Card>
-          <CardHeader>
-            <CardTitle>Aggiunti di recente</CardTitle>
-            <CardDescription>
-              Gli ultimi libri della tua libreria personale
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-3 pb-6">
-            {recentlyAdded.map((book) => (
-              <div
-                key={book.id}
-                className="flex items-center gap-3 rounded-lg border p-3"
-              >
-                <div
-                  className={cn(
-                    "h-14 w-10 rounded bg-linear-to-br",
-                    book.cover !== null ? book.coverTone : "",
-                  )}
-                >
-                  {book.cover && (
-                    <Image
-                      src={book.cover}
-                      alt={`Copertina di ${book.title}`}
-                      width={40}
-                      height={56}
-                    />
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium">{book.title}</p>
-                  <p className="text-muted-foreground truncate text-xs">
-                    {book.author}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+          {currentlyReading.map((book) => (
+            <BookReadingCard key={book.id} book={book} />
+          ))}
+        </div>
+
+        <SectionHeader
+          title="Aggiunti di recente"
+          description="Gli ultimi libri della tua libreria personale"
+          action={
+            <Button variant="link" size="sm">
+              Vai alla libreria
+            </Button>
+          }
+        />
+
+        <div className="w-auto grid  min-w-0 grid-cols-2 gap-4 sm:flex sm:flex-row sm:justify-between sm:pb-4 sm:scrollbar-thin">
+          {recentlyAdded.map((book) => (
+            <BookSmallCard key={book.id} book={book} />
+          ))}
+        </div>
       </section>
     </>
   );
