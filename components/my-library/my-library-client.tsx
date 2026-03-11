@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowUpDown,
   Grid3X3,
@@ -12,11 +12,19 @@ import {
   Tag,
   User,
   SlidersHorizontal,
+  Trash2,
 } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 import { Input } from "@/components/ui/input";
 import { Progress } from "@/components/ui/progress";
@@ -117,26 +125,34 @@ function CoverWithSkeleton({
 }
 
 export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
+  const [localBooks, setLocalBooks] = useState<LibraryBook[]>(books);
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [query, setQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [authorFilter, setAuthorFilter] = useState("all");
   const [sortBy, setSortBy] = useState<SortBy>("recent");
+  const [deleteTarget, setDeleteTarget] = useState<LibraryBook | null>(null);
+  const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    setLocalBooks(books);
+  }, [books]);
 
   const uniqueCategories = useMemo(
-    () => [...new Set(books.flatMap((book) => book.categories))].sort(),
-    [books],
+    () => [...new Set(localBooks.flatMap((book) => book.categories))].sort(),
+    [localBooks],
   );
   const uniqueAuthors = useMemo(
-    () => [...new Set(books.map((book) => book.author))].sort(),
-    [books],
+    () => [...new Set(localBooks.map((book) => book.author))].sort(),
+    [localBooks],
   );
 
   const filteredBooks = useMemo(() => {
     const loweredQuery = query.trim().toLowerCase();
 
-    const filtered = books.filter((book) => {
+    const filtered = localBooks.filter((book) => {
       const matchesQuery =
         loweredQuery.length === 0 ||
         book.title.toLowerCase().includes(loweredQuery) ||
@@ -163,7 +179,37 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
     });
 
     return sorted;
-  }, [authorFilter, books, categoryFilter, query, sortBy, statusFilter]);
+  }, [authorFilter, localBooks, categoryFilter, query, sortBy, statusFilter]);
+
+  const handleConfirmDelete = async () => {
+    if (!deleteTarget) return;
+    setIsDeleting(true);
+    setDeleteError(null);
+
+    try {
+      const response = await fetch("/api/library/delete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ bookId: deleteTarget.id }),
+      });
+
+      if (!response.ok) {
+        const data = (await response.json()) as { error?: string };
+        setDeleteError(data?.error ?? "Errore durante la rimozione.");
+        return;
+      }
+
+      setLocalBooks((prev) =>
+        prev.filter((book) => book.id !== deleteTarget.id),
+      );
+      setDeleteTarget(null);
+    } catch (error) {
+      setDeleteError("Errore di rete durante la rimozione.");
+      console.error("Errore di rete durante la rimozione.", error);
+    } finally {
+      setIsDeleting(false);
+    }
+  };
 
   return (
     <div className="mx-auto w-full space-y-6">
@@ -304,8 +350,25 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
           {filteredBooks.map((book) => (
             <article
               key={book.id}
-              className="bg-card rounded-lg border p-3 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm"
+              className="group bg-card relative rounded-lg border p-3 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm"
             >
+              {book.status === "wishlist" && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon-sm"
+                  className="absolute -right-3 -top-3 z-10 rounded-full  hover:bg-red-200 shadow-sm 
+               opacity-0 scale-90 transition-all duration-150
+               group-hover:opacity-100 group-hover:scale-100"
+                  onClick={() => {
+                    setDeleteTarget(book);
+                    setDeleteError(null);
+                  }}
+                  aria-label={`Rimuovi ${book.title} dalla wishlist`}
+                >
+                  <Trash2 className="size-4 text-destructive" />
+                </Button>
+              )}
               <Link
                 href={`/my-library/${slugify(book.title)}`}
                 className="block w-full cursor-pointer text-left"
@@ -336,14 +399,14 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                     </Badge>
                   ))}
                 </div>
-                {book.status === "reading" && (
+                {/* {book.status === "reading" && (
                   <div className="space-y-1">
                     <Progress value={book.progress} />
                     <p className="text-muted-foreground text-xs">
                       {book.progress}% completato
                     </p>
                   </div>
-                )}
+                )} */}
               </Link>
             </article>
           ))}
@@ -415,6 +478,48 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
           </table>
         </div>
       )}
+
+      <Dialog
+        open={Boolean(deleteTarget)}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteTarget(null);
+            setDeleteError(null);
+          }
+        }}
+      >
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Rimuovere dalla lista desideri?</DialogTitle>
+            <DialogDescription>
+              {deleteTarget
+                ? `Confermi di rimuovere "${deleteTarget.title}" dalla tua lista desideri?`
+                : "Confermi di rimuovere il libro dalla tua lista desideri?"}
+            </DialogDescription>
+          </DialogHeader>
+          {deleteError && (
+            <p className="text-sm text-destructive">{deleteError}</p>
+          )}
+          <DialogFooter>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => setDeleteTarget(null)}
+              disabled={isDeleting}
+            >
+              Annulla
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Rimozione..." : "Rimuovi"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
