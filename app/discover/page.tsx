@@ -1,12 +1,25 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Bookmark, BookOpen, CheckCircle2, Loader2, Search, Star } from "lucide-react";
+import {
+  Bookmark,
+  BookOpen,
+  CheckCircle2,
+  Loader2,
+  Search,
+  Star,
+} from "lucide-react";
 import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import {
   Dialog,
   DialogClose,
@@ -72,7 +85,7 @@ export default function DiscoverPage() {
 
       try {
         const response = await fetch(
-          `/api/open-library/search?q=${encodeURIComponent(debouncedQuery)}`
+          `/api/open-library/search?q=${encodeURIComponent(debouncedQuery)}`,
         );
         const payload = (await response.json()) as {
           results?: SearchResult[];
@@ -89,7 +102,9 @@ export default function DiscoverPage() {
       } catch (error) {
         if (!isCancelled) {
           const message =
-            error instanceof Error ? error.message : "Errore durante la ricerca.";
+            error instanceof Error
+              ? error.message
+              : "Errore durante la ricerca.";
           setSearchError(message);
           setResults([]);
         }
@@ -106,7 +121,7 @@ export default function DiscoverPage() {
 
   const selectedBook = useMemo(
     () => results.find((result) => result.id === selectedBookId) ?? null,
-    [results, selectedBookId]
+    [results, selectedBookId],
   );
 
   async function handleAddBook() {
@@ -160,7 +175,9 @@ export default function DiscoverPage() {
       setIsDialogOpen(false);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "Errore durante il salvataggio.";
+        error instanceof Error
+          ? error.message
+          : "Errore durante il salvataggio.";
       setSaveError(message);
     } finally {
       setIsSaving(false);
@@ -172,24 +189,30 @@ export default function DiscoverPage() {
       <header className="space-y-2">
         <h1 className="text-3xl font-semibold tracking-tight">Scopri libri</h1>
         <p className="text-muted-foreground">
-          Cerca su Open Library e aggiungi nuovi libri alla tua libreria personale.
+          Cerca su Open Library e aggiungi nuovi libri alla tua libreria
+          personale.
         </p>
       </header>
 
       <Card>
         <CardHeader>
           <CardTitle>Ricerca</CardTitle>
-          <CardDescription>Inserisci titolo o autore (minimo 2 caratteri)</CardDescription>
+          <CardDescription>
+            Inserisci titolo o autore (minimo 2 caratteri)
+          </CardDescription>
         </CardHeader>
         <CardContent className="space-y-3 pb-6">
-          <div className="relative w-full max-w-xl">
-            <Search className="text-muted-foreground absolute top-1/2 left-2 size-4 -translate-y-1/2" />
-            <Input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              className="pl-8"
-              placeholder="Es. Dune, Calvino, Tolkien..."
-            />
+          <div className="relative w-full max-w-xl flex items-center gap-2">
+            <div>
+              <Search className="text-muted-foreground absolute top-1/2 left-2 size-4 -translate-y-1/2" />
+              <Input
+                value={query}
+                onChange={(event) => setQuery(event.target.value)}
+                className="pl-8"
+                placeholder="Es. Dune, Calvino, Tolkien..."
+              />
+            </div>
+            <Button>Consigliami un libro</Button>
           </div>
 
           {isLoading && (
@@ -230,8 +253,12 @@ export default function DiscoverPage() {
                     )}
                   </div>
                   <div className="min-w-0 space-y-1">
-                    <CardTitle className="line-clamp-2 text-lg">{book.title}</CardTitle>
-                    <p className="text-muted-foreground line-clamp-1 text-sm">{book.author}</p>
+                    <CardTitle className="line-clamp-2 text-lg">
+                      {book.title}
+                    </CardTitle>
+                    <p className="text-muted-foreground line-clamp-1 text-sm">
+                      {book.author}
+                    </p>
                     <div className="text-muted-foreground flex flex-wrap gap-2 text-xs">
                       {book.year && <span>{book.year}</span>}
                       {book.publisher && <span>{book.publisher}</span>}
@@ -239,7 +266,10 @@ export default function DiscoverPage() {
                   </div>
                 </div>
                 <div className="flex flex-wrap gap-1">
-                  {(book.categories.length ? book.categories : ["Senza categoria"])
+                  {(book.categories.length
+                    ? book.categories
+                    : ["Senza categoria"]
+                  )
                     .slice(0, 3)
                     .map((category) => (
                       <Badge key={category} variant="outline">
@@ -264,7 +294,9 @@ export default function DiscoverPage() {
                   disabled={isSaved}
                   className="w-full"
                 >
-                  {isSaved ? "Già aggiunto in questa sessione" : "Aggiungi alla libreria"}
+                  {isSaved
+                    ? "Già aggiunto in questa sessione"
+                    : "Aggiungi alla libreria"}
                 </Button>
               </CardContent>
             </Card>
@@ -291,7 +323,6 @@ export default function DiscoverPage() {
               <DialogTitle>Aggiungi alla libreria</DialogTitle>
             </div>
           </div>
-          
 
           <div className="space-y-6 px-6 py-5">
             {selectedBook && (
@@ -313,8 +344,12 @@ export default function DiscoverPage() {
                   )}
                 </div>
                 <div className="space-y-1">
-                  <p className="text-base font-semibold">{selectedBook.title}</p>
-                  <p className="text-muted-foreground text-sm">{selectedBook.author}</p>
+                  <p className="text-base font-semibold">
+                    {selectedBook.title}
+                  </p>
+                  <p className="text-muted-foreground text-sm">
+                    {selectedBook.author}
+                  </p>
                   <div className="flex flex-wrap gap-2 text-xs">
                     {(selectedBook.categories.length
                       ? selectedBook.categories
@@ -367,31 +402,37 @@ export default function DiscoverPage() {
                 La tua valutazione
               </p>
               <div className="flex items-center gap-2">
-                <div className="flex items-center gap-1">
+                <div className="flex items-center gap-0.5 group">
                   {Array.from({ length: 5 }, (_, index) => {
                     const value = index + 1;
                     const filled = value <= rating;
+
                     return (
                       <button
                         key={value}
                         type="button"
                         onClick={() => setRating(value)}
-                        className="transition hover:scale-105"
                         aria-label={`Valuta ${value} su 5`}
+                        className="cursor-pointer transition-transform duration-150 hover:scale-110 hover:drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]"
                       >
                         <Star
-                          className={`size-5 ${
-                            filled
-                              ? "fill-amber-400 text-amber-400"
-                              : "text-muted-foreground/40"
-                          }`}
+                          className={`
+              size-4 transition-all duration-150
+              ${
+                filled
+                  ? "fill-amber-400 text-amber-400"
+                  : "text-muted-foreground/40"
+              }
+              group-hover:text-amber-300
+            `}
                         />
                       </button>
                     );
                   })}
                 </div>
-                <span className="text-muted-foreground text-xs">
-                  {rating ? `${rating}/5` : "Nessuna"}
+
+                <span className="text-sm font-medium">
+                  {rating ? rating + "/5" : ""}
                 </span>
               </div>
             </div>
@@ -408,27 +449,35 @@ export default function DiscoverPage() {
               />
             </div>
 
-            {saveError && <p className="text-destructive text-sm">{saveError}</p>}
+            {saveError && (
+              <p className="text-destructive text-sm">{saveError}</p>
+            )}
           </div>
 
           <DialogFooter>
             {/* <DialogClose asChild>
               <Button variant="ghost">Annulla</Button>
             </DialogClose> */}
-            <Button onClick={handleAddBook} disabled={isSaving || !selectedBook}>
+            <Button
+              onClick={handleAddBook}
+              disabled={isSaving || !selectedBook}
+            >
               {isSaving ? "Salvataggio..." : "Aggiungi alla libreria"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {!isLoading && debouncedQuery.length >= 2 && results.length === 0 && !searchError && (
-        <Card>
-          <CardContent className="text-muted-foreground py-8 text-center text-sm">
-            Nessun risultato trovato.
-          </CardContent>
-        </Card>
-      )}
+      {!isLoading &&
+        debouncedQuery.length >= 2 &&
+        results.length === 0 &&
+        !searchError && (
+          <Card>
+            <CardContent className="text-muted-foreground py-8 text-center text-sm">
+              Nessun risultato trovato.
+            </CardContent>
+          </Card>
+        )}
     </div>
   );
 }

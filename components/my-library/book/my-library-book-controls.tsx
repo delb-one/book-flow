@@ -83,10 +83,7 @@ export function MyLibraryBookControls({
         {initialStatus === "read" ? (
           <Badge variant="success">{statusLabel.read}</Badge>
         ) : (
-          <Select
-            value={selectableValue}
-            onValueChange={handleStatusChange}
-          >
+          <Select value={selectableValue} onValueChange={handleStatusChange}>
             <SelectTrigger>
               <SelectValue
                 placeholder={`Attuale: ${statusLabel[initialStatus]}`}
@@ -137,7 +134,9 @@ export function MyLibraryBookControls({
             })}
           </div>
 
-          <span className="text-sm font-medium">{rating} / 5</span>
+          <span className="text-sm font-medium">
+            {rating ? rating + "/5" : ""}
+          </span>
         </div>
       </div>
     </div>

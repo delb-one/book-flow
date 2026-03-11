@@ -2,6 +2,8 @@ import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { BookCover } from "./book-cover";
 import { statusLabel, statusVariant } from "@/app/page";
+import Link from "next/link";
+import { slugify } from "@/lib/utils";
 
 interface BookReadingCardProps {
   book: {
@@ -17,12 +19,16 @@ interface BookReadingCardProps {
 export function BookReadingCard({ book }: BookReadingCardProps) {
   return (
     <div className="flex items-center gap-4 p-3 border rounded-lg min-w-0">
+
+      <Link href={`/my-library/${slugify(book.title)}`} >
       <BookCover
         cover={book.cover}
         title={book.title}
         tone={book.coverTone}
         className="h-30 w-20"
       />
+      
+      </Link>
 
       <div className="min-w-0 flex-1">
         <div className="mb-1 flex flex-wrap items-center gap-2">

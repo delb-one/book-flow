@@ -118,14 +118,7 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
 
   return (
     <div className="mx-auto w-full space-y-6">
-      <header className="space-y-2">
-        <h1 className="text-3xl font-semibold tracking-tight">
-          La mia libreria
-        </h1>
-        <p className="text-muted-foreground">
-          Gestisci i tuoi libri con vista griglia o tabella.
-        </p>
-      </header>
+      
 
       <Card>
         <CardHeader className="space-y-4">
