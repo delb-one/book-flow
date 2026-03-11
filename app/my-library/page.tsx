@@ -1,4 +1,4 @@
-import { MyLibraryClient } from "@/components/my-library-client";
+import { MyLibraryClient } from "@/components/my-library/my-library-client";
 import { getLibraryBooks } from "@/lib/library-data";
 
 export default async function MyLibraryPage() {

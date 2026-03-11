@@ -174,9 +174,10 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">Stato: tutti</SelectItem>
-                  <SelectItem value="unread">Da leggere</SelectItem>
+                  <SelectItem value="unread">Non letti</SelectItem>
                   <SelectItem value="reading">In lettura</SelectItem>
                   <SelectItem value="read">Letto</SelectItem>
+                  <SelectItem value="wishlist">Lista desideri</SelectItem>
                 </SelectContent>
               </Select>
 

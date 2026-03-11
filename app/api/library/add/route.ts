@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import type { PostgrestError } from "@supabase/supabase-js";
 import { revalidateTag } from "next/cache";
 
 import { createServerSupabaseClient } from "@/lib/supabase/server";
@@ -14,7 +13,7 @@ type AddBookPayload = {
   cover?: string | null;
   categories?: string[];
   description?: string | null;
-  status?: "unread" | "reading" | "read";
+  status?: "unread" | "reading" | "read" | "wishlist";
   rating?: number | null;
   notes?: string | null;
 };
@@ -28,34 +27,13 @@ function slugify(value: string) {
     .replace(/^-+|-+$/g, "");
 }
 
-function formatSupabaseError(stage: string, error: PostgrestError) {
-  return {
-    error: `Salvataggio fallito nello stage "${stage}".`,
-    stage,
-    code: error.code,
-    message: error.message,
-    details: error.details,
-    hint: error.hint,
-  };
-}
-
 export async function POST(request: NextRequest) {
   const payload = (await request.json()) as AddBookPayload;
 
   if (!payload?.id || !payload?.title || !payload?.author) {
     return NextResponse.json(
       { error: "Campi obbligatori mancanti (id, title, author)." },
-      { status: 400 }
-    );
-  }
-
-  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return NextResponse.json(
-      {
-        error:
-          "SUPABASE_SERVICE_ROLE_KEY mancante in .env.local. Aggiungi la chiave service_role da Supabase > Settings > API e riavvia il server.",
-      },
-      { status: 500 }
+      { status: 400 },
     );
   }
 
@@ -65,7 +43,6 @@ export async function POST(request: NextRequest) {
   const status = payload.status ?? "unread";
   const rating = payload.rating ?? 0;
   const notes = payload.notes ?? "";
-  const hasServiceRole = Boolean(process.env.SUPABASE_SERVICE_ROLE_KEY);
 
   try {
     const { data: existingAuthor, error: authorSelectError } = await supabase
@@ -75,9 +52,10 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (authorSelectError) {
-      return NextResponse.json(formatSupabaseError("authors.select", authorSelectError), {
-        status: 500,
-      });
+      return NextResponse.json(
+        { error: "Errore nel recupero autore." },
+        { status: 500 },
+      );
     }
 
     let authorId = existingAuthor?.id as string | undefined;
@@ -95,10 +73,12 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (authorInsertError) {
-        return NextResponse.json(formatSupabaseError("authors.insert", authorInsertError), {
-          status: 500,
-        });
+        return NextResponse.json(
+          { error: "Errore nella creazione autore." },
+          { status: 500 },
+        );
       }
+
       authorId = createdAuthor.id as string;
     }
 
@@ -114,25 +94,27 @@ export async function POST(request: NextRequest) {
         cover: payload.cover ?? null,
         categories: payload.categories ?? [],
       },
-      { onConflict: "id" }
+      { onConflict: "id" },
     );
 
     if (bookUpsertError) {
-      return NextResponse.json(formatSupabaseError("books.upsert", bookUpsertError), {
-        status: 500,
-      });
+      return NextResponse.json(
+        { error: "Errore nel salvataggio libro." },
+        { status: 500 },
+      );
     }
 
-    const { data: existingLibraryBook, error: existingLibraryBookError } = await supabase
-      .from("library_books")
-      .select("id")
-      .eq("book_id", payload.id)
-      .maybeSingle();
+    const { data: existingLibraryBook, error: existingLibraryBookError } =
+      await supabase
+        .from("library_books")
+        .select("id")
+        .eq("book_id", payload.id)
+        .maybeSingle();
 
     if (existingLibraryBookError) {
       return NextResponse.json(
-        formatSupabaseError("library_books.select", existingLibraryBookError),
-        { status: 500 }
+        { error: "Errore nel recupero libro libreria." },
+        { status: 500 },
       );
     }
 
@@ -156,37 +138,20 @@ export async function POST(request: NextRequest) {
       });
 
     if (libraryInsertError) {
-      return NextResponse.json(formatSupabaseError("library_books.insert", libraryInsertError), {
-        status: 500,
-      });
-    }
-
-    revalidateTag("library-books");
-
-    return NextResponse.json({ ok: true, alreadyInLibrary: false });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    const isPermissionError =
-      message.toLowerCase().includes("row-level security") ||
-      message.toLowerCase().includes("permission denied") ||
-      message.toLowerCase().includes("not allowed");
-
-    if (isPermissionError && !hasServiceRole) {
       return NextResponse.json(
-        {
-          error:
-            "Permessi Supabase insufficienti. Aggiungi SUPABASE_SERVICE_ROLE_KEY in .env.local oppure abilita policy insert/select/update per authors, books e library_books.",
-        },
-        { status: 500 }
+        { error: "Errore nell'inserimento in libreria." },
+        { status: 500 },
       );
     }
 
+    revalidateTag("library-books", "max");
+
+    return NextResponse.json({ ok: true, alreadyInLibrary: false });
+  } catch (error) {
     return NextResponse.json(
-      {
-        error: "Errore imprevisto durante il salvataggio.",
-        message,
-      },
-      { status: 500 }
+      { error: "Errore imprevisto durante il salvataggio." },
+      { status: 500 },
     );
   }
 }
+

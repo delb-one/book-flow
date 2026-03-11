@@ -15,7 +15,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { MyLibraryBookControls } from "@/components/my-library-book-controls";
+import { MyLibraryBookControls } from "@/components/my-library/book/my-library-book-controls";
+import { MyLibraryNotesEditor } from "@/components/my-library/book/my-library-notes-editor";
 
 export default async function MyLibraryBookPage({
   params,
@@ -62,13 +63,14 @@ export default async function MyLibraryBookPage({
           </Card>
 
           <Card>
-            <CardHeader className="pb-3">
+            {/* <CardHeader className="pb-3">
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
                 Preferenze lettura
               </p>
-            </CardHeader>
-            <CardContent className="space-y-4">
+            </CardHeader> */}
+            <CardContent className="space-y-4 p-4">
               <MyLibraryBookControls
+                bookId={book.id}
                 initialStatus={book.status}
                 initialRating={book.rating}
               />
@@ -143,10 +145,10 @@ export default async function MyLibraryBookPage({
 
           <Card>
             <CardHeader className="flex flex-row items-center gap-2 pb-2">
-              <BookText className="size-4 text-muted-foreground" />
+              <BookText className="size-5 text-primary" />
               <p className="text-base font-semibold">Sinossi</p>
             </CardHeader>
-            <CardContent className="text-muted-foreground text-sm leading-relaxed">
+            <CardContent className="text-muted-foreground text-sm leading-relaxed p-4">
               {book.description || "Nessuna descrizione disponibile."}
             </CardContent>
           </Card>
@@ -154,15 +156,15 @@ export default async function MyLibraryBookPage({
           <Card className="bg-muted/40">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
               <div className="flex items-center gap-2">
-                <PencilLine className="size-4 text-muted-foreground" />
+                <PencilLine className="size-5 text-primary" />
                 <p className="text-base font-semibold">Note personali</p>
               </div>
-              <Button variant="ghost" size="sm">
-                Modifica
-              </Button>
             </CardHeader>
-            <CardContent className="text-muted-foreground text-sm leading-relaxed">
-              {book.notes || "Nessuna nota inserita."}
+            <CardContent className="p-4">
+              <MyLibraryNotesEditor
+                bookId={book.id}
+                initialNotes={book.notes}
+              />
             </CardContent>
           </Card>
 

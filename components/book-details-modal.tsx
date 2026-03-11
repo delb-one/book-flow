@@ -15,7 +15,7 @@ import {
   statusLabel,
   statusVariant,
   toneClass,
-} from "./my-library-client";
+} from "./my-library/my-library-client";
 
 interface Book {
   id?: string;

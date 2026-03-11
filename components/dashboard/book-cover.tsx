@@ -12,7 +12,7 @@ export function BookCover({ cover, title, tone, className }: BookCoverProps) {
   return (
     <div
       className={cn(
-        "overflow-hidden rounded-lg bg-linear-to-br shadow",
+        "overflow-hidden rounded-lg bg-linear-to-br shadow transition-all hover:-translate-y-0.5",
         tone,
         className
       )}

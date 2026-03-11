@@ -92,7 +92,7 @@ export default async function Home() {
                   {stats.unread}
                 </CardTitle>
               </div>
-              <Bookmark className="size-5 text-primary" aria-hidden />
+              <BookOpen className="size-5 text-primary" aria-hidden />
             </div>
           </CardHeader>
         </Card>
@@ -107,7 +107,7 @@ export default async function Home() {
                   {stats.wishlist}
                 </CardTitle>
               </div>
-              <BookOpen className="size-5 text-primary" aria-hidden />
+              <Bookmark className="size-5 text-primary" aria-hidden />
             </div>
           </CardHeader>
         </Card>

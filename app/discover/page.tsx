@@ -1,13 +1,21 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Loader2, Search } from "lucide-react";
+import { Bookmark, BookOpen, CheckCircle2, Loader2, Search, Star } from "lucide-react";
 import Image from "next/image";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 type SearchResult = {
   id: string;
@@ -33,8 +41,9 @@ export default function DiscoverPage() {
 
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const [status, setStatus] = useState<AddStatus>("unread");
-  const [rating, setRating] = useState("0");
+  const [rating, setRating] = useState(0);
   const [notes, setNotes] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
 
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
@@ -115,7 +124,7 @@ export default function DiscoverPage() {
         body: JSON.stringify({
           ...selectedBook,
           status,
-          rating: Number(rating),
+          rating,
           notes,
         }),
       });
@@ -146,8 +155,9 @@ export default function DiscoverPage() {
       setSavedBookIds((prev) => new Set(prev).add(selectedBook.id));
       setSelectedBookId(null);
       setStatus("unread");
-      setRating("0");
+      setRating(0);
       setNotes("");
+      setIsDialogOpen(false);
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Errore durante il salvataggio.";
@@ -197,7 +207,6 @@ export default function DiscoverPage() {
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
         {results.map((book) => {
-          const isSelected = selectedBookId === book.id;
           const isSaved = savedBookIds.has(book.id);
 
           return (
@@ -243,58 +252,175 @@ export default function DiscoverPage() {
               <CardContent className="space-y-3 pb-6">
                 <Button
                   onClick={() => {
+                    if (isSaved) return;
                     setSaveError(null);
-                    setSelectedBookId(isSelected ? null : book.id);
+                    setSelectedBookId(book.id);
+                    setStatus("unread");
+                    setRating(0);
+                    setNotes("");
+                    setIsDialogOpen(true);
                   }}
                   variant={isSaved ? "secondary" : "default"}
+                  disabled={isSaved}
                   className="w-full"
                 >
                   {isSaved ? "Già aggiunto in questa sessione" : "Aggiungi alla libreria"}
                 </Button>
-
-                {isSelected && (
-                  <div className="space-y-3 rounded-md border p-3">
-                    <div className="grid gap-2 sm:grid-cols-2">
-                      <select
-                        value={status}
-                        onChange={(event) => setStatus(event.target.value as AddStatus)}
-                        className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                      >
-                        <option value="unread">Da leggere</option>
-                        <option value="reading">In lettura</option>
-                        <option value="read">Letto</option>
-                        <option value="wishlist">Da comprare</option>
-                      </select>
-                      <select
-                        value={rating}
-                        onChange={(event) => setRating(event.target.value)}
-                        className="border-input bg-background h-9 rounded-md border px-3 text-sm"
-                      >
-                        <option value="0">Valutazione: nessuna</option>
-                        <option value="1">1 stella</option>
-                        <option value="2">2 stelle</option>
-                        <option value="3">3 stelle</option>
-                        <option value="4">4 stelle</option>
-                        <option value="5">5 stelle</option>
-                      </select>
-                    </div>
-                    <textarea
-                      value={notes}
-                      onChange={(event) => setNotes(event.target.value)}
-                      placeholder="Note personali (opzionale)"
-                      className="border-input bg-background min-h-20 w-full rounded-md border px-3 py-2 text-sm"
-                    />
-                    {saveError && <p className="text-destructive text-sm">{saveError}</p>}
-                    <Button onClick={handleAddBook} disabled={isSaving} className="w-full">
-                      {isSaving ? "Salvataggio..." : "Conferma aggiunta"}
-                    </Button>
-                  </div>
-                )}
               </CardContent>
             </Card>
           );
         })}
       </section>
+
+      <Dialog
+        open={isDialogOpen}
+        onOpenChange={(open) => {
+          setIsDialogOpen(open);
+          if (!open) {
+            setSelectedBookId(null);
+            setSaveError(null);
+          }
+        }}
+      >
+        <DialogContent className="sm:max-w-2xl">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="text-primary bg-primary/10 flex size-9 items-center justify-center rounded-lg">
+                <Bookmark className="size-4" />
+              </div>
+              <DialogTitle>Aggiungi alla libreria</DialogTitle>
+            </div>
+          </div>
+          
+
+          <div className="space-y-6 px-6 py-5">
+            {selectedBook && (
+              <div className="flex gap-4">
+                <div className="bg-muted h-28 w-20 shrink-0 overflow-hidden rounded-lg">
+                  {selectedBook.cover ? (
+                    <Image
+                      src={selectedBook.cover}
+                      alt={`Copertina di ${selectedBook.title}`}
+                      className="h-full w-full object-cover"
+                      width={80}
+                      height={112}
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="text-muted-foreground flex h-full items-center justify-center text-xs">
+                      No cover
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <p className="text-base font-semibold">{selectedBook.title}</p>
+                  <p className="text-muted-foreground text-sm">{selectedBook.author}</p>
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    {(selectedBook.categories.length
+                      ? selectedBook.categories
+                      : ["Senza categoria"]
+                    )
+                      .slice(0, 2)
+                      .map((category) => (
+                        <Badge key={category} variant="outline">
+                          {category}
+                        </Badge>
+                      ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="space-y-3">
+              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
+                Stato lettura
+              </p>
+              <div className="grid gap-2 sm:grid-cols-4">
+                {[
+                  { value: "unread", label: "Non letto", icon: BookOpen },
+                  { value: "reading", label: "In lettura", icon: BookOpen },
+                  { value: "read", label: "Letto", icon: CheckCircle2 },
+                  { value: "wishlist", label: "Da comprare", icon: Bookmark },
+                ].map(({ value, label, icon: Icon }) => {
+                  const isActive = status === value;
+                  return (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setStatus(value as AddStatus)}
+                      className={`border-input flex flex-col items-center gap-2 rounded-lg border px-3 py-3 text-xs font-medium transition cursor-pointer ${
+                        isActive
+                          ? "bg-primary/10 text-primary border-primary/40 shadow-sm"
+                          : "bg-background text-foreground/80 hover:border-primary/30"
+                      }`}
+                    >
+                      <Icon className="size-4" />
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
+                La tua valutazione
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: 5 }, (_, index) => {
+                    const value = index + 1;
+                    const filled = value <= rating;
+                    return (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setRating(value)}
+                        className="transition hover:scale-105"
+                        aria-label={`Valuta ${value} su 5`}
+                      >
+                        <Star
+                          className={`size-5 ${
+                            filled
+                              ? "fill-amber-400 text-amber-400"
+                              : "text-muted-foreground/40"
+                          }`}
+                        />
+                      </button>
+                    );
+                  })}
+                </div>
+                <span className="text-muted-foreground text-xs">
+                  {rating ? `${rating}/5` : "Nessuna"}
+                </span>
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
+                Note personali (opzionale)
+              </p>
+              <Textarea
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                placeholder="Aggiungi le tue impressioni..."
+                className="min-h-28"
+              />
+            </div>
+
+            {saveError && <p className="text-destructive text-sm">{saveError}</p>}
+          </div>
+
+          <DialogFooter>
+            {/* <DialogClose asChild>
+              <Button variant="ghost">Annulla</Button>
+            </DialogClose> */}
+            <Button onClick={handleAddBook} disabled={isSaving || !selectedBook}>
+              {isSaving ? "Salvataggio..." : "Aggiungi alla libreria"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {!isLoading && debouncedQuery.length >= 2 && results.length === 0 && !searchError && (
         <Card>

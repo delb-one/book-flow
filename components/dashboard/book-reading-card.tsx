@@ -35,10 +35,10 @@ export function BookReadingCard({ book }: BookReadingCardProps) {
 
         <p className="text-muted-foreground mb-2 text-sm">{book.author}</p>
 
-        <Progress value={book.progress} />
+        {/* <Progress value={book.progress} /> */}
       </div>
 
-      <span className="text-muted-foreground text-sm">{book.progress}%</span>
+      {/* <span className="text-muted-foreground text-sm">{book.progress}%</span> */}
     </div>
   );
 }
