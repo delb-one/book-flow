@@ -33,6 +33,7 @@ const navItems = [
   { label: "La mia libreria", icon: BookCopy, href: "/my-library" },
   { label: "Scopri libri", icon: Compass, href: "/discover" },
   { label: "Autori", icon: Users, href: "/authors" },
+  { label: "Categorie", icon: Book, href: "/categories" },
   // { label: "Statistiche lettura", icon: BarChart3, href: "#" },
   // { label: "Impostazioni", icon: Settings, href: "#" },
 ];
@@ -40,7 +41,7 @@ const navItems = [
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   useEffect(() => {
     for (const item of navItems) {

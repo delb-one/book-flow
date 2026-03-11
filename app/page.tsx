@@ -1,6 +1,6 @@
-import { BookReadingCard } from "@/components/my-library/book-reading-card";
-import { BookSmallCard } from "@/components/my-library/book-small-card";
-import { SectionHeader } from "@/components/my-library/section-header";
+import { BookReadingCard } from "@/components/dashboard/book-reading-card";
+import { BookSmallCard } from "@/components/dashboard/book-small-card";
+import { SectionHeader } from "@/components/dashboard/section-header";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/card";
 import { getLibraryBooks } from "@/lib/library-data";
 import { Book, BookCheck, BookOpen, Bookmark } from "lucide-react";
+import Link from "next/link";
 
 const toneClass: Record<string, string> = {
   amber: "from-amber-200 to-amber-400",
@@ -123,7 +124,9 @@ export default async function Home() {
           description="Gli ultimi libri della tua libreria personale"
           action={
             <Button variant="link" size="sm">
-              Vai alla libreria
+              <Link href="/my-library">
+                Vai alla libreria
+              </Link>
             </Button>
           }
         />

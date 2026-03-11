@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ArrowUpDown, Grid3X3, List, Search, Star, Tag, User, SlidersHorizontal } from "lucide-react";
 
@@ -18,7 +19,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import type { LibraryBook, ReadingStatus } from "@/lib/library-data";
-import { BookDetailsModal } from "./book-details-modal";
+import { slugify } from "@/lib/utils";
 
 type ViewMode = "grid" | "table";
 type StatusFilter = "all" | ReadingStatus;
@@ -71,7 +72,6 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [authorFilter, setAuthorFilter] = useState("all");
   const [sortBy, setSortBy] = useState<SortBy>("recent");
-  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
 
   const uniqueCategories = useMemo(
     () => [...new Set(books.flatMap((book) => book.categories))].sort(),
@@ -113,11 +113,6 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
 
     return sorted;
   }, [authorFilter, books, categoryFilter, query, sortBy, statusFilter]);
-
-  const selectedBook = useMemo(
-    () => books.find((book) => book.id === selectedBookId) ?? null,
-    [books, selectedBookId],
-  );
 
   return (
     <div className="mx-auto w-full space-y-6">
@@ -264,11 +259,6 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
         </CardHeader>
 
         <CardContent className="pb-6">
-          <BookDetailsModal
-            selectedBook={selectedBook}
-            setSelectedBookId={setSelectedBookId}
-          />
-
           {filteredBooks.length === 0 && (
             <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
               Nessun libro corrisponde ai filtri selezionati.
@@ -282,10 +272,9 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                   key={book.id}
                   className="bg-card rounded-lg border p-3 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm"
                 >
-                  <button
-                    type="button"
-                    onClick={() => setSelectedBookId(book.id)}
-                    className="w-full text-left cursor-pointer"
+                  <Link
+                    href={`/my-library/${slugify(book.title)}`}
+                    className="block w-full cursor-pointer text-left"
                   >
                     <div className="mb-3 h-44 w-full overflow-hidden rounded-md">
                       {book.cover ? (
@@ -328,7 +317,7 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                         </p>
                       </div>
                     )}
-                  </button>
+                  </Link>
                 </article>
               ))}
             </div>
@@ -394,12 +383,10 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                         </Badge>
                       </td>
                       <td className="px-3 py-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedBookId(book.id)}
-                        >
-                          Dettagli
+                        <Button asChild variant="ghost" size="sm">
+                          <Link href={`/my-library/${slugify(book.title)}`}>
+                            Dettagli
+                          </Link>
                         </Button>
                       </td>
                     </tr>
