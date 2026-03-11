@@ -186,7 +186,7 @@ export default function DiscoverPage() {
 
   return (
     <div className="mx-auto w-full space-y-6">
-      <header className="space-y-2">
+      <header >
         <h1 className="text-3xl font-semibold tracking-tight">Scopri libri</h1>
         <p className="text-muted-foreground">
           Cerca su Open Library e aggiungi nuovi libri alla tua libreria
@@ -212,7 +212,7 @@ export default function DiscoverPage() {
                 placeholder="Es. Dune, Calvino, Tolkien..."
               />
             </div>
-            <Button>Consigliami un libro</Button>
+            <Button variant="default">Consigliami un libro</Button>
           </div>
 
           {isLoading && (

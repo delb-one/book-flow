@@ -67,6 +67,46 @@ export function RatingStars({ rating }: { rating: number }) {
   );
 }
 
+function CoverWithSkeleton({
+  src,
+  alt,
+  width,
+  height,
+  fallbackTone,
+}: {
+  src: string | null;
+  alt: string;
+  width: number;
+  height: number;
+  fallbackTone: string;
+}) {
+  const [loaded, setLoaded] = useState(false);
+  const showSkeleton = Boolean(src) && !loaded;
+
+  return (
+    <div className="relative h-full w-full overflow-hidden rounded-md">
+      {showSkeleton && (
+        <div className="absolute inset-0 animate-pulse bg-muted" />
+      )}
+      {src ? (
+        <Image
+          src={src}
+          alt={alt}
+          width={width}
+          height={height}
+          className={`h-full w-full object-cover transition-opacity duration-300 ${
+            loaded ? "opacity-100" : "opacity-0"
+          }`}
+          onLoad={() => setLoaded(true)}
+          unoptimized
+        />
+      ) : (
+        <div className={`h-full w-full bg-linear-to-br ${fallbackTone}`} />
+      )}
+    </div>
+  );
+}
+
 export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
   const [query, setQuery] = useState("");
@@ -272,21 +312,14 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                     href={`/my-library/${slugify(book.title)}`}
                     className="block w-full cursor-pointer text-left"
                   >
-                    <div className="mb-3 h-44 w-full overflow-hidden rounded-md">
-                      {book.cover ? (
-                        <Image
-                          src={book.cover}
-                          alt={`Copertina di ${book.title}`}
-                          width={256}
-                          height={352}
-                          className="h-full w-full object-cover"
-                          unoptimized
-                        />
-                      ) : (
-                        <div
-                          className={`h-full w-full bg-linear-to-br ${toneClass[book.coverTone]}`}
-                        />
-                      )}
+                    <div className="mb-3 h-44 w-full">
+                      <CoverWithSkeleton
+                        src={book.cover}
+                        alt={`Copertina di ${book.title}`}
+                        width={256}
+                        height={352}
+                        fallbackTone={toneClass[book.coverTone]}
+                      />
                     </div>
                     <p className="line-clamp-1 font-medium">{book.title}</p>
                     <p className="text-muted-foreground mb-2 text-sm">
@@ -337,21 +370,14 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                   {filteredBooks.map((book) => (
                     <tr key={book.id} className="border-t">
                       <td className="px-3 py-2">
-                        <div className="h-14 w-10 overflow-hidden rounded">
-                          {book.cover ? (
-                            <Image
-                              src={book.cover}
-                              alt={`Copertina di ${book.title}`}
-                              width={40}
-                              height={56}
-                              className="h-full w-full object-cover"
-                              unoptimized
-                            />
-                          ) : (
-                            <div
-                              className={`h-full w-full bg-linear-to-br ${toneClass[book.coverTone]}`}
-                            />
-                          )}
+                        <div className="h-14 w-10">
+                          <CoverWithSkeleton
+                            src={book.cover}
+                            alt={`Copertina di ${book.title}`}
+                            width={40}
+                            height={56}
+                            fallbackTone={toneClass[book.coverTone]}
+                          />
                         </div>
                       </td>
                       <td className="px-3 py-2">
