@@ -79,10 +79,10 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
           />
         </div>
 
+      </div>
         <div className="text-sm text-muted-foreground">
           {filteredAuthors.length} autori trovati
         </div>
-      </div>
 
       {filteredAuthors.length === 0 ? (
         <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">

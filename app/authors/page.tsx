@@ -22,13 +22,6 @@ export default async function AuthorsPage() {
 
   return (
     <div className="mx-auto w-full space-y-6">
-      <header className="">
-        <h1 className="text-3xl font-semibold tracking-tight">Autori</h1>
-        <p className="text-muted-foreground">
-          Esplora gli autori presenti nella tua libreria personale.
-        </p>
-      </header>
-
       <AuthorsPageClient authors={authors} />
     </div>
   );

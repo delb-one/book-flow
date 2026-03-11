@@ -3,7 +3,16 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { ArrowUpDown, Grid3X3, List, Search, Star, Tag, User, SlidersHorizontal } from "lucide-react";
+import {
+  ArrowUpDown,
+  Grid3X3,
+  List,
+  Search,
+  Star,
+  Tag,
+  User,
+  SlidersHorizontal,
+} from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -158,267 +167,254 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
 
   return (
     <div className="mx-auto w-full space-y-6">
-      
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="relative w-full lg:max-w-md">
+          <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
+          <Input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            className="pl-9"
+            placeholder="Cerca titolo, autore o categoria..."
+          />
+        </div>
 
-      <Card>
-        <CardHeader className="space-y-4">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="relative w-full lg:max-w-md">
-              <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-              <Input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                className="pl-9"
-                placeholder="Cerca titolo, autore o categoria..."
-              />
-            </div>
+        <div className="inline-flex rounded-md border p-1">
+          <Button
+            variant={viewMode === "grid" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("grid")}
+          >
+            <Grid3X3 className="size-4" />
+            Griglia
+          </Button>
+          <Button
+            variant={viewMode === "table" ? "secondary" : "ghost"}
+            size="sm"
+            onClick={() => setViewMode("table")}
+          >
+            <List className="size-4" />
+            Tabella
+          </Button>
+        </div>
+      </div>
 
-            <div className="inline-flex rounded-md border p-1">
-              <Button
-                variant={viewMode === "grid" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid3X3 className="size-4" />
-                Griglia
-              </Button>
-              <Button
-                variant={viewMode === "table" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("table")}
-              >
-                <List className="size-4" />
-                Tabella
-              </Button>
-            </div>
-          </div>
+      <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+        <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-1 lg:flex-wrap lg:items-center">
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => setStatusFilter(value as StatusFilter)}
+          >
+            <SelectTrigger className="lg:w-50">
+              <SlidersHorizontal className="size-4 text-muted-foreground" />
+              <SelectValue placeholder="Stato" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Stato: tutti</SelectItem>
+              <SelectItem value="unread">Non letti</SelectItem>
+              <SelectItem value="reading">In lettura</SelectItem>
+              <SelectItem value="read">Letto</SelectItem>
+              <SelectItem value="wishlist">Lista desideri</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="grid gap-3 sm:grid-cols-2 lg:flex lg:flex-1 lg:flex-wrap lg:items-center">
-              <Select
-                value={statusFilter}
-                onValueChange={(value) =>
-                  setStatusFilter(value as StatusFilter)
-                }
-              >
-                <SelectTrigger className="lg:w-50">
-                  <SlidersHorizontal className="size-4 text-muted-foreground" />
-                  <SelectValue placeholder="Stato" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Stato: tutti</SelectItem>
-                  <SelectItem value="unread">Non letti</SelectItem>
-                  <SelectItem value="reading">In lettura</SelectItem>
-                  <SelectItem value="read">Letto</SelectItem>
-                  <SelectItem value="wishlist">Lista desideri</SelectItem>
-                </SelectContent>
-              </Select>
+          <Select
+            value={categoryFilter}
+            onValueChange={(value) => setCategoryFilter(value)}
+          >
+            <SelectTrigger className="lg:w-50">
+              <Tag className="size-4 text-muted-foreground" />
+              <SelectValue placeholder="Categoria" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Categoria: tutte</SelectItem>
+              {uniqueCategories.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {category}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
 
-              <Select
-                value={categoryFilter}
-                onValueChange={(value) => setCategoryFilter(value)}
-              >
-                <SelectTrigger className="lg:w-50">
-                  <Tag className="size-4 text-muted-foreground" />
-                  <SelectValue placeholder="Categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Categoria: tutte</SelectItem>
-                  {uniqueCategories.map((category) => (
-                    <SelectItem key={category} value={category}>
-                      {category}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+          <Select
+            value={authorFilter}
+            onValueChange={(value) => setAuthorFilter(value)}
+          >
+            <SelectTrigger className="lg:w-50">
+              <User className="size-4 text-muted-foreground" />
+              <SelectValue placeholder="Autore" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">Autore: tutti</SelectItem>
+              {uniqueAuthors.map((author) => (
+                <SelectItem key={author} value={author}>
+                  {author}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
 
-              <Select
-                value={authorFilter}
-                onValueChange={(value) => setAuthorFilter(value)}
-              >
-                <SelectTrigger className="lg:w-50">
-                  <User className="size-4 text-muted-foreground" />
-                  <SelectValue placeholder="Autore" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">Autore: tutti</SelectItem>
-                  {uniqueAuthors.map((author) => (
-                    <SelectItem key={author} value={author}>
-                      {author}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+        <div className="lg:shrink-0">
+          <Select
+            value={sortBy}
+            onValueChange={(value) => setSortBy(value as SortBy)}
+          >
+            <SelectTrigger className="lg:w-60">
+              <ArrowUpDown className="size-4 text-muted-foreground" />
+              <SelectValue placeholder="Ordina" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">
+                Ordina: aggiunti di recente
+              </SelectItem>
+              <SelectItem value="title">Ordina: titolo</SelectItem>
+              <SelectItem value="rating">Ordina: valutazione</SelectItem>
+              <SelectItem value="year">Ordina: anno pubblicazione</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
 
-            <div className="lg:shrink-0">
-              <Select
-                value={sortBy}
-                onValueChange={(value) => setSortBy(value as SortBy)}
-              >
-                <SelectTrigger className="lg:w-60">
-                  <ArrowUpDown className="size-4 text-muted-foreground" />
-                  <SelectValue placeholder="Ordina" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">
-                    Ordina: aggiunti di recente
-                  </SelectItem>
-                  <SelectItem value="title">Ordina: titolo</SelectItem>
-                  <SelectItem value="rating">Ordina: valutazione</SelectItem>
-                  <SelectItem value="year">
-                    Ordina: anno pubblicazione
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+      <div className="flex items-center justify-between gap-2">
+        <p className="text-muted-foreground text-sm">
+          {filteredBooks.length} libri trovati
+        </p>
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            setQuery("");
+            setStatusFilter("all");
+            setCategoryFilter("all");
+            setAuthorFilter("all");
+            setSortBy("recent");
+          }}
+        >
+          Reset filtri
+        </Button>
+      </div>
+      {filteredBooks.length === 0 && (
+        <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
+          Nessun libro corrisponde ai filtri selezionati.
+        </div>
+      )}
 
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-muted-foreground text-sm">
-              {filteredBooks.length} libri trovati
-            </p>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setQuery("");
-                setStatusFilter("all");
-                setCategoryFilter("all");
-                setAuthorFilter("all");
-                setSortBy("recent");
-              }}
+      {filteredBooks.length > 0 && viewMode === "grid" && (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          {filteredBooks.map((book) => (
+            <article
+              key={book.id}
+              className="bg-card rounded-lg border p-3 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm"
             >
-              Reset filtri
-            </Button>
-          </div>
-        </CardHeader>
+              <Link
+                href={`/my-library/${slugify(book.title)}`}
+                className="block w-full cursor-pointer text-left"
+              >
+                <div className="mb-3 h-44 w-full">
+                  <CoverWithSkeleton
+                    src={book.cover}
+                    alt={`Copertina di ${book.title}`}
+                    width={256}
+                    height={352}
+                    fallbackTone={toneClass[book.coverTone]}
+                  />
+                </div>
+                <p className="line-clamp-1 font-medium">{book.title}</p>
+                <p className="text-muted-foreground mb-2 text-sm">
+                  {book.author}
+                </p>
+                <div className="mb-2 flex items-center justify-between">
+                  <Badge variant={statusVariant[book.status]}>
+                    {statusLabel[book.status]}
+                  </Badge>
+                  <RatingStars rating={book.rating} />
+                </div>
+                <div className="mb-2 flex flex-wrap gap-1">
+                  {book.categories.slice(0, 2).map((category) => (
+                    <Badge key={category} variant="outline">
+                      {category}
+                    </Badge>
+                  ))}
+                </div>
+                {book.status === "reading" && (
+                  <div className="space-y-1">
+                    <Progress value={book.progress} />
+                    <p className="text-muted-foreground text-xs">
+                      {book.progress}% completato
+                    </p>
+                  </div>
+                )}
+              </Link>
+            </article>
+          ))}
+        </div>
+      )}
 
-        <CardContent className="pb-6">
-          {filteredBooks.length === 0 && (
-            <div className="text-muted-foreground rounded-lg border border-dashed p-8 text-center text-sm">
-              Nessun libro corrisponde ai filtri selezionati.
-            </div>
-          )}
-
-          {filteredBooks.length > 0 && viewMode === "grid" && (
-            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      {filteredBooks.length > 0 && viewMode === "table" && (
+        <div className="overflow-x-auto rounded-lg border">
+          <table className="w-full min-w-230 text-left text-sm">
+            <thead className="bg-muted/60">
+              <tr>
+                <th className="px-3 py-2 font-medium">Copertina</th>
+                <th className="px-3 py-2 font-medium">Titolo</th>
+                <th className="px-3 py-2 font-medium">Autore</th>
+                <th className="px-3 py-2 font-medium">Categorie</th>
+                <th className="px-3 py-2 font-medium">Valutazione</th>
+                <th className="px-3 py-2 font-medium">Stato</th>
+                <th className="px-3 py-2 font-medium">Azioni</th>
+              </tr>
+            </thead>
+            <tbody>
               {filteredBooks.map((book) => (
-                <article
-                  key={book.id}
-                  className="bg-card rounded-lg border p-3 shadow-xs transition-all hover:-translate-y-0.5 hover:shadow-sm"
-                >
-                  <Link
-                    href={`/my-library/${slugify(book.title)}`}
-                    className="block w-full cursor-pointer text-left"
-                  >
-                    <div className="mb-3 h-44 w-full">
+                <tr key={book.id} className="border-t">
+                  <td className="px-3 py-2">
+                    <div className="h-14 w-10">
                       <CoverWithSkeleton
                         src={book.cover}
                         alt={`Copertina di ${book.title}`}
-                        width={256}
-                        height={352}
+                        width={40}
+                        height={56}
                         fallbackTone={toneClass[book.coverTone]}
                       />
                     </div>
-                    <p className="line-clamp-1 font-medium">{book.title}</p>
-                    <p className="text-muted-foreground mb-2 text-sm">
-                      {book.author}
+                  </td>
+                  <td className="px-3 py-2">
+                    <p className="font-medium">{book.title}</p>
+                    <p className="text-muted-foreground text-xs">
+                      {book.year || "-"}
                     </p>
-                    <div className="mb-2 flex items-center justify-between">
-                      <Badge variant={statusVariant[book.status]}>
-                        {statusLabel[book.status]}
-                      </Badge>
-                      <RatingStars rating={book.rating} />
-                    </div>
-                    <div className="mb-2 flex flex-wrap gap-1">
-                      {book.categories.slice(0, 2).map((category) => (
+                  </td>
+                  <td className="px-3 py-2">{book.author}</td>
+                  <td className="px-3 py-2">
+                    <div className="flex flex-wrap gap-1">
+                      {book.categories.map((category) => (
                         <Badge key={category} variant="outline">
                           {category}
                         </Badge>
                       ))}
                     </div>
-                    {book.status === "reading" && (
-                      <div className="space-y-1">
-                        <Progress value={book.progress} />
-                        <p className="text-muted-foreground text-xs">
-                          {book.progress}% completato
-                        </p>
-                      </div>
-                    )}
-                  </Link>
-                </article>
+                  </td>
+                  <td className="px-3 py-2">
+                    <RatingStars rating={book.rating} />
+                  </td>
+                  <td className="px-3 py-2">
+                    <Badge variant={statusVariant[book.status]}>
+                      {statusLabel[book.status]}
+                    </Badge>
+                  </td>
+                  <td className="px-3 py-2">
+                    <Button asChild variant="ghost" size="sm">
+                      <Link href={`/my-library/${slugify(book.title)}`}>
+                        Dettagli
+                      </Link>
+                    </Button>
+                  </td>
+                </tr>
               ))}
-            </div>
-          )}
-
-          {filteredBooks.length > 0 && viewMode === "table" && (
-            <div className="overflow-x-auto rounded-lg border">
-              <table className="w-full min-w-230 text-left text-sm">
-                <thead className="bg-muted/60">
-                  <tr>
-                    <th className="px-3 py-2 font-medium">Copertina</th>
-                    <th className="px-3 py-2 font-medium">Titolo</th>
-                    <th className="px-3 py-2 font-medium">Autore</th>
-                    <th className="px-3 py-2 font-medium">Categorie</th>
-                    <th className="px-3 py-2 font-medium">Valutazione</th>
-                    <th className="px-3 py-2 font-medium">Stato</th>
-                    <th className="px-3 py-2 font-medium">Azioni</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredBooks.map((book) => (
-                    <tr key={book.id} className="border-t">
-                      <td className="px-3 py-2">
-                        <div className="h-14 w-10">
-                          <CoverWithSkeleton
-                            src={book.cover}
-                            alt={`Copertina di ${book.title}`}
-                            width={40}
-                            height={56}
-                            fallbackTone={toneClass[book.coverTone]}
-                          />
-                        </div>
-                      </td>
-                      <td className="px-3 py-2">
-                        <p className="font-medium">{book.title}</p>
-                        <p className="text-muted-foreground text-xs">
-                          {book.year || "-"}
-                        </p>
-                      </td>
-                      <td className="px-3 py-2">{book.author}</td>
-                      <td className="px-3 py-2">
-                        <div className="flex flex-wrap gap-1">
-                          {book.categories.map((category) => (
-                            <Badge key={category} variant="outline">
-                              {category}
-                            </Badge>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-3 py-2">
-                        <RatingStars rating={book.rating} />
-                      </td>
-                      <td className="px-3 py-2">
-                        <Badge variant={statusVariant[book.status]}>
-                          {statusLabel[book.status]}
-                        </Badge>
-                      </td>
-                      <td className="px-3 py-2">
-                        <Button asChild variant="ghost" size="sm">
-                          <Link href={`/my-library/${slugify(book.title)}`}>
-                            Dettagli
-                          </Link>
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

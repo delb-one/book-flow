@@ -51,6 +51,14 @@ export default function DiscoverPage() {
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [isRecommendationMode, setIsRecommendationMode] = useState(false);
+  const [isRecommending, setIsRecommending] = useState(false);
+  const [recommendationError, setRecommendationError] = useState<string | null>(
+    null,
+  );
+  const [recommendationReason, setRecommendationReason] = useState<
+    string | null
+  >(null);
 
   const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
   const [status, setStatus] = useState<AddStatus>("unread");
@@ -71,6 +79,8 @@ export default function DiscoverPage() {
   }, [query]);
 
   useEffect(() => {
+    if (isRecommendationMode) return;
+
     if (debouncedQuery.length < 2) {
       setResults([]);
       setSearchError(null);
@@ -117,7 +127,7 @@ export default function DiscoverPage() {
     return () => {
       isCancelled = true;
     };
-  }, [debouncedQuery]);
+  }, [debouncedQuery, isRecommendationMode]);
 
   const selectedBook = useMemo(
     () => results.find((result) => result.id === selectedBookId) ?? null,
@@ -184,15 +194,48 @@ export default function DiscoverPage() {
     }
   }
 
+  async function handleRecommend() {
+    setIsRecommending(true);
+    setRecommendationError(null);
+    setSearchError(null);
+    setRecommendationReason(null);
+
+    try {
+      const response = await fetch("/api/recommendation");
+      const payload = (await response.json()) as {
+        result?: SearchResult;
+        reason?: { category?: string; message?: string };
+        error?: string;
+      };
+
+      if (!response.ok || !payload.result) {
+        throw new Error(payload.error || "Impossibile trovare un consiglio.");
+      }
+
+      setIsRecommendationMode(true);
+      setQuery("");
+      setResults([payload.result]);
+      setRecommendationReason(
+        payload.reason?.message ||
+          (payload.reason?.category
+            ? `Consiglio basato su: ${payload.reason.category}`
+            : null),
+      );
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Errore durante la raccomandazione.";
+      setRecommendationError(message);
+      setResults([]);
+    } finally {
+      setIsRecommending(false);
+    }
+  }
+
   return (
     <div className="mx-auto w-full space-y-6">
-      <header >
-        <h1 className="text-3xl font-semibold tracking-tight">Scopri libri</h1>
-        <p className="text-muted-foreground">
-          Cerca su Open Library e aggiungi nuovi libri alla tua libreria
-          personale.
-        </p>
-      </header>
+      
 
       <Card>
         <CardHeader>
@@ -207,12 +250,23 @@ export default function DiscoverPage() {
               <Search className="text-muted-foreground absolute top-1/2 left-2 size-4 -translate-y-1/2" />
               <Input
                 value={query}
-                onChange={(event) => setQuery(event.target.value)}
+                onChange={(event) => {
+                  setIsRecommendationMode(false);
+                  setRecommendationReason(null);
+                  setRecommendationError(null);
+                  setQuery(event.target.value);
+                }}
                 className="pl-8"
                 placeholder="Es. Dune, Calvino, Tolkien..."
               />
             </div>
-            <Button variant="default">Consigliami un libro</Button>
+            <Button
+              variant="default"
+              onClick={handleRecommend}
+              disabled={isLoading || isRecommending}
+            >
+              {isRecommending ? "Consiglio in corso..." : "Consigliami un libro"}
+            </Button>
           </div>
 
           {isLoading && (
@@ -224,6 +278,16 @@ export default function DiscoverPage() {
 
           {searchError && (
             <p className="text-destructive text-sm">{searchError}</p>
+          )}
+
+          {recommendationError && (
+            <p className="text-destructive text-sm">{recommendationError}</p>
+          )}
+
+          {recommendationReason && (
+            <p className="text-muted-foreground text-xs">
+              {recommendationReason}
+            </p>
           )}
         </CardContent>
       </Card>
@@ -469,6 +533,7 @@ export default function DiscoverPage() {
       </Dialog>
 
       {!isLoading &&
+        !isRecommendationMode &&
         debouncedQuery.length >= 2 &&
         results.length === 0 &&
         !searchError && (
