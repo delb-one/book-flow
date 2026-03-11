@@ -9,7 +9,7 @@ interface BookReadingCardProps {
     author: string;
     cover: string | null;
     coverTone: string;
-    status: "unread" | "reading" | "read";
+    status: "unread" | "reading" | "read" | "wishlist";
     progress: number;
   };
 }

@@ -5,7 +5,6 @@ import {
   ArrowLeft,
   BookOpen,
   BookText,
-  Star,
   PencilLine,
   TrendingUp,
 } from "lucide-react";
@@ -16,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { MyLibraryBookControls } from "@/components/my-library-book-controls";
 
 export default async function MyLibraryBookPage({
   params,
@@ -64,37 +64,14 @@ export default async function MyLibraryBookPage({
           <Card>
             <CardHeader className="pb-3">
               <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
-                Stato lettura
+                Preferenze lettura
               </p>
             </CardHeader>
             <CardContent className="space-y-4">
-              <Badge variant="secondary" className="w-fit">
-                {book.status === "reading"
-                  ? "In lettura"
-                  : book.status === "read"
-                  ? "Letto"
-                  : "Da leggere"}
-              </Badge>
-
-              <div>
-                <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
-                  Valutazione
-                </p>
-                <div className="mt-2 flex items-center gap-2">
-                  <div className="flex items-center gap-0.5">
-                    {Array.from({ length: 5 }, (_, index) => {
-                      const filled = index < book.rating;
-                      return (
-                        <Star
-                          key={index}
-                          className={`size-4 ${filled ? "fill-amber-400 text-amber-400" : "text-muted-foreground/40"}`}
-                        />
-                      );
-                    })}
-                  </div>
-                  <span className="text-sm font-medium">{book.rating} / 5</span>
-                </div>
-              </div>
+              <MyLibraryBookControls
+                initialStatus={book.status}
+                initialRating={book.rating}
+              />
 
               {/* <div className="grid grid-cols-2 gap-4 border-t pt-4 text-sm">
                 <div>
@@ -160,12 +137,7 @@ export default async function MyLibraryBookPage({
                   {book.pages ? `${book.pages} pagine` : "-"}
                 </p>
               </div>
-              {/* <div className="space-y-1">
-                <p className="text-muted-foreground text-xs font-semibold uppercase">
-                  Formato
-                </p>
-                <p className="text-sm font-medium">-</p>
-              </div> */}
+              
             </CardContent>
           </Card>
 

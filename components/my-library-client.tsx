@@ -35,18 +35,20 @@ export const toneClass: Record<string, string> = {
 };
 
 export const statusLabel: Record<ReadingStatus, string> = {
-  unread: "Da leggere",
+  unread: "Non letto",
   reading: "In lettura",
   read: "Letto",
+  wishlist: "Da comprare",
 };
 
 export const statusVariant: Record<
   ReadingStatus,
-  "muted" | "warning" | "success"
+  "muted" | "warning" | "success" | "outline"
 > = {
   unread: "muted",
   reading: "warning",
   read: "success",
+  wishlist: "outline",
 };
 
 export function RatingStars({ rating }: { rating: number }) {

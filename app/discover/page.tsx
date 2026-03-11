@@ -22,7 +22,7 @@ type SearchResult = {
   source: "openlibrary";
 };
 
-type AddStatus = "unread" | "reading" | "read";
+type AddStatus = "unread" | "reading" | "read" | "wishlist";
 
 export default function DiscoverPage() {
   const [query, setQuery] = useState("");
@@ -263,6 +263,7 @@ export default function DiscoverPage() {
                         <option value="unread">Da leggere</option>
                         <option value="reading">In lettura</option>
                         <option value="read">Letto</option>
+                        <option value="wishlist">Da comprare</option>
                       </select>
                       <select
                         value={rating}

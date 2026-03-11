@@ -19,15 +19,17 @@ const toneClass: Record<string, string> = {
 };
 
 const statusLabel = {
-  unread: "Da leggere",
+  unread: "Non letto",
   reading: "In lettura",
   read: "Letto",
+  wishlist: "Da comprare"
 } as const;
 
 const statusVariant = {
   unread: "muted",
   reading: "warning",
   read: "success",
+  wishlist: "outline",
 } as const;
 
 export default async function AuthorDetailsPage({
@@ -46,7 +48,7 @@ export default async function AuthorDetailsPage({
   const authorName = authorBooks[0].author;
 
   return (
-    <div className="mx-auto max-w-7xl space-y-6">
+    <div className="mx-auto w-full space-y-6">
       <div>
         <Button asChild variant="ghost" size="sm" className="-ml-2">
           <Link href="/authors">

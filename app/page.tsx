@@ -25,21 +25,24 @@ export const statusVariant = {
   unread: "muted",
   reading: "warning",
   read: "success",
+  wishlist: "outline",
 } as const;
 
 export const statusLabel = {
-  unread: "Da leggere",
+  unread: "Non letto",
   reading: "In lettura",
   read: "Letto",
+  wishlist: "Da comprare",
 } as const;
 
 export default async function Home() {
   const books = await getLibraryBooks();
   const stats = {
-    total: books.length,
+    total: books.filter((book) => book.status !== "wishlist").length,
     read: books.filter((book) => book.status === "read").length,
     reading: books.filter((book) => book.status === "reading").length,
     unread: books.filter((book) => book.status === "unread").length,
+    wishlist: books.filter((book) => book.status === "wishlist").length,
   };
   const currentlyReading = books.filter((book) => book.status === "reading");
   const recentlyAdded = [...books]
@@ -54,7 +57,7 @@ export default async function Home() {
             <div className="flex items-start justify-between gap-4">
               <div>
                 <CardDescription className="text-sm">
-                  Libri totali
+                  Libri posseduti
                 </CardDescription>
                 <CardTitle className="font-bold text-2xl">
                   {stats.total}
@@ -68,7 +71,9 @@ export default async function Home() {
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <CardDescription className="text-sm">Libri letti</CardDescription>
+                <CardDescription className="text-sm">
+                  Libri letti
+                </CardDescription>
                 <CardTitle className="font-bold text-2xl">
                   {stats.read}
                 </CardTitle>
@@ -77,16 +82,17 @@ export default async function Home() {
             </div>
           </CardHeader>
         </Card>
+
         <Card>
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <CardDescription className="text-sm">In lettura</CardDescription>
+                <CardDescription className="text-sm">Non letti</CardDescription>
                 <CardTitle className="font-bold text-2xl">
-                  {stats.reading}
+                  {stats.unread}
                 </CardTitle>
               </div>
-              <BookOpen className="size-5 text-primary" aria-hidden />
+              <Bookmark className="size-5 text-primary" aria-hidden />
             </div>
           </CardHeader>
         </Card>
@@ -94,12 +100,14 @@ export default async function Home() {
           <CardHeader>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <CardDescription className="text-sm">Da leggere</CardDescription>
+                <CardDescription className="text-sm">
+                  Lista desideri
+                </CardDescription>
                 <CardTitle className="font-bold text-2xl">
-                  {stats.unread}
+                  {stats.wishlist}
                 </CardTitle>
               </div>
-              <Bookmark className="size-5 text-primary" aria-hidden />
+              <BookOpen className="size-5 text-primary" aria-hidden />
             </div>
           </CardHeader>
         </Card>
@@ -110,7 +118,7 @@ export default async function Home() {
           title="In lettura"
           description="Tieni traccia dei progressi dei libri in corso"
           badge={currentlyReading.length}
-          book={{status: "reading"}}
+          book={{ status: "reading" }}
         />
 
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
@@ -124,9 +132,7 @@ export default async function Home() {
           description="Gli ultimi libri della tua libreria personale"
           action={
             <Button variant="link" size="sm">
-              <Link href="/my-library">
-                Vai alla libreria
-              </Link>
+              <Link href="/my-library">Vai alla libreria</Link>
             </Button>
           }
         />

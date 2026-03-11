@@ -1,7 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { unstable_cache } from "next/cache";
 
-export type ReadingStatus = "unread" | "reading" | "read";
+export type ReadingStatus = "unread" | "reading" | "read" | "wishlist";
 
 export type LibraryBook = {
   id: string;

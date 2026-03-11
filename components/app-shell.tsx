@@ -33,7 +33,7 @@ const navItems = [
   { label: "La mia libreria", icon: BookCopy, href: "/my-library" },
   { label: "Scopri libri", icon: Compass, href: "/discover" },
   { label: "Autori", icon: Users, href: "/authors" },
-  { label: "Categorie", icon: Book, href: "/categories" },
+  // { label: "Categorie", icon: Book, href: "/categories" },
   // { label: "Statistiche lettura", icon: BarChart3, href: "#" },
   // { label: "Impostazioni", icon: Settings, href: "#" },
 ];
