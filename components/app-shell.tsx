@@ -56,13 +56,13 @@ export function AppShell({ children }: { children: React.ReactNode }) {
       <TooltipProvider delayDuration={150}>
         <div
           className={cn(
-            "grid h-full md:grid-cols-[240px_1fr]",
+            "grid h-full transition-[grid-template-columns] duration-300 ease-out md:grid-cols-[240px_1fr]",
             isCollapsed && "md:grid-cols-[80px_1fr]",
           )}
         >
           <aside
             className={cn(
-              "bg-card/60 border-r md:h-screen md:overflow-y-auto md:p-6",
+              "bg-card/60 border-r transition-[padding] duration-300 ease-out md:h-screen md:overflow-y-auto md:p-6",
               isCollapsed && "md:px-3",
             )}
           >

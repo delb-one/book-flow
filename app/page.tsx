@@ -12,14 +12,7 @@ import { getLibraryBooks } from "@/lib/library-data";
 import { Book, BookCheck, BookOpen, Bookmark } from "lucide-react";
 import Link from "next/link";
 
-const toneClass: Record<string, string> = {
-  amber: "from-amber-200 to-amber-400",
-  emerald: "from-emerald-200 to-emerald-500",
-  rose: "from-rose-200 to-rose-500",
-  indigo: "from-indigo-200 to-indigo-500",
-  cyan: "from-cyan-200 to-cyan-500",
-  slate: "from-slate-200 to-slate-500",
-};
+
 
 export const statusVariant = {
   unread: "muted",
@@ -137,7 +130,7 @@ export default async function Home() {
           }
         />
 
-        <div className="w-auto grid  min-w-0 grid-cols-2 gap-4 sm:flex sm:flex-row sm:justify-between sm:pb-4 sm:scrollbar-thin">
+        <div className="flex flex-wrap gap-4">
           {recentlyAdded.map((book) => (
             <BookSmallCard key={book.id} book={book} />
           ))}
