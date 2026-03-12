@@ -254,7 +254,7 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-1 min-h-0 flex-col gap-6 overflow-hidden">
+      <div className="flex flex-1 min-h-0 flex-col gap-6">
         {" "}
         <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative w-full lg:max-w-md">

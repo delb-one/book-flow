@@ -113,6 +113,7 @@ export async function GET(request: NextRequest) {
     "fields",
     "key,title,author_name,first_publish_year,publisher,subject,cover_i,number_of_pages_median",
   );
+  url.searchParams.set("lang", "en");
 
   try {
     const response = await fetch(url.toString(), {

@@ -23,8 +23,6 @@ import {
 
 const PAGE_SIZE = 8;
 
-
-
 type AuthorCard = {
   slug: string;
   name: string;
@@ -86,7 +84,6 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
       <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div className="relative w-full lg:max-w-md">
           <Search className="text-muted-foreground absolute top-1/2 left-3 size-4 -translate-y-1/2" />
-
           <Input
             type="search"
             placeholder="Cerca autore..."
@@ -96,11 +93,10 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
             className="pl-9"
           />
         </div>
-
       </div>
-        <div className="text-sm text-muted-foreground">
-          {filteredAuthors.length} autori trovati
-        </div>
+      <div className="text-sm text-muted-foreground">
+        {filteredAuthors.length} autori trovati
+      </div>
 
       {filteredAuthors.length === 0 ? (
         <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
