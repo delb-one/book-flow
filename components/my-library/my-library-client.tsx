@@ -596,13 +596,30 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
                             {statusLabel[book.status]}
                           </Badge>
                         </td>
-                        <td className="px-3 py-2">
+                      <td className="px-3 py-2">
+                        <div className="flex items-center gap-2">
                           <Button asChild variant="ghost" size="sm">
                             <Link href={`/my-library/${slugify(book.title)}`}>
                               Dettagli
                             </Link>
                           </Button>
-                        </td>
+                          {book.status === "wishlist" && (
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon-sm"
+                              className="hover:bg-red-200"
+                              onClick={() => {
+                                setDeleteTarget(book);
+                                setDeleteError(null);
+                              }}
+                              aria-label={`Rimuovi ${book.title} dalla wishlist`}
+                            >
+                              <Trash2 className="size-4 text-destructive" />
+                            </Button>
+                          )}
+                        </div>
+                      </td>
                       </tr>
                     ))}
                   </tbody>
