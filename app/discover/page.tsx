@@ -292,7 +292,7 @@ export default function DiscoverPage() {
         </CardContent>
       </Card>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
         {results.map((book) => {
           const isSaved = savedBookIds.has(book.id);
 

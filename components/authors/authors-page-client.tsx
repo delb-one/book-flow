@@ -11,17 +11,19 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "@/components/ui/pagination";
 
 const PAGE_SIZE = 8;
 
-const toneClass: Record<LibraryBook["coverTone"], string> = {
-  amber: "from-amber-200 to-amber-400",
-  emerald: "from-emerald-200 to-emerald-500",
-  rose: "from-rose-200 to-rose-500",
-  indigo: "from-indigo-200 to-indigo-500",
-  cyan: "from-cyan-200 to-cyan-500",
-  slate: "from-slate-200 to-slate-500",
-};
+
 
 type AuthorCard = {
   slug: string;
@@ -61,6 +63,22 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
   function goToPage(nextPage: number) {
     const safePage = Math.min(Math.max(nextPage, 1), totalPages);
     setPage(safePage);
+  }
+
+  function getVisiblePages(total: number, current: number) {
+    if (total <= 5) return Array.from({ length: total }, (_, i) => i + 1);
+    if (current <= 3) return [1, 2, 3, 4, "ellipsis", total] as const;
+    if (current >= total - 2)
+      return [1, "ellipsis", total - 3, total - 2, total - 1, total] as const;
+    return [
+      1,
+      "ellipsis",
+      current - 1,
+      current,
+      current + 1,
+      "ellipsis",
+      total,
+    ] as const;
   }
 
   return (
@@ -117,17 +135,18 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
                           key={book.id}
                           className={cn(
                             "relative overflow-hidden rounded-md bg-linear-to-br",
-                            toneClass[book.coverTone],
                             sizeClass,
                           )}
                         >
-                          {book.cover && (
+                          {book.cover ? (
                             <Image
                               src={book.cover}
                               alt={`Copertina di ${book.title}`}
                               fill
                               className="object-cover"
                             />
+                          ) : (
+                            <div className="h-full w-full animate-pulse rounded-md bg-muted/60" />
                           )}
                         </div>
                       );
@@ -149,30 +168,53 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
             ))}
           </section>
 
-          <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-            <div className="text-sm text-muted-foreground">
-              Pagina {currentPage} di {totalPages}
-            </div>
+          {totalPages > 1 && (
+            <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+              <div className="text-xs text-muted-foreground w-full">
+                Pagina {currentPage} di {totalPages}
+              </div>
 
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => goToPage(currentPage - 1)}
-                disabled={currentPage === 1}
-              >
-                Precedente
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => goToPage(currentPage + 1)}
-                disabled={currentPage === totalPages}
-              >
-                Successiva
-              </Button>
+              <Pagination className="justify-end">
+                <PaginationContent>
+                  <PaginationItem>
+                    <PaginationPrevious
+                      onClick={() => goToPage(currentPage - 1)}
+                      disabled={currentPage === 1}
+                      aria-disabled={currentPage === 1}
+                    />
+                  </PaginationItem>
+                  {getVisiblePages(totalPages, currentPage).map(
+                    (item, index) =>
+                      item === "ellipsis" ? (
+                        <PaginationItem key={`ellipsis-${index}`}>
+                          <PaginationEllipsis />
+                        </PaginationItem>
+                      ) : (
+                        <PaginationItem key={item}>
+                          <PaginationLink
+                            href="#"
+                            onClick={(event) => {
+                              event.preventDefault();
+                              goToPage(item);
+                            }}
+                            isActive={item === currentPage}
+                          >
+                            {item}
+                          </PaginationLink>
+                        </PaginationItem>
+                      ),
+                  )}
+                  <PaginationItem>
+                    <PaginationNext
+                      onClick={() => goToPage(currentPage + 1)}
+                      disabled={currentPage === totalPages}
+                      aria-disabled={currentPage === totalPages}
+                    />
+                  </PaginationItem>
+                </PaginationContent>
+              </Pagination>
             </div>
-          </div>
+          )}
         </>
       )}
     </div>
