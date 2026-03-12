@@ -36,7 +36,7 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "@/components/ui/pagination";
-import { Progress } from "@/components/ui/progress";
+// import { Progress } from "@/components/ui/progress";
 import {
   Select,
   SelectContent,
@@ -46,39 +46,18 @@ import {
 } from "@/components/ui/select";
 import type { LibraryBook, ReadingStatus } from "@/lib/library-data";
 import { slugify } from "@/lib/utils";
+import { statusLabel, statusVariant } from "@/lib/library-status";
 
 type ViewMode = "grid" | "table";
 type StatusFilter = "all" | ReadingStatus;
 type SortBy = "recent" | "title" | "rating" | "year";
 
 const TABLE_PAGE_SIZE = 20;
-const GRID_PAGE_SIZE = 16;
+const GRID_PAGE_SIZE = 24;
 
-// export const toneClass: Record<string, string> = {
-//   amber: "from-amber-200 to-amber-400",
-//   emerald: "from-emerald-200 to-emerald-500",
-//   rose: "from-rose-200 to-rose-500",
-//   indigo: "from-indigo-200 to-indigo-500",
-//   cyan: "from-cyan-200 to-cyan-500",
-//   slate: "from-slate-200 to-slate-500",
-// };
 
-export const statusLabel: Record<ReadingStatus, string> = {
-  unread: "Non letto",
-  reading: "In lettura",
-  read: "Letto",
-  wishlist: "Da comprare",
-};
 
-export const statusVariant: Record<
-  ReadingStatus,
-  "muted" | "warning" | "success" | "outline"
-> = {
-  unread: "muted",
-  reading: "warning",
-  read: "success",
-  wishlist: "outline",
-};
+
 
 export function RatingStars({ rating }: { rating: number }) {
   return (

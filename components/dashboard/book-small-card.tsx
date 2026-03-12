@@ -1,4 +1,4 @@
-import { statusLabel, statusVariant } from "@/app/page";
+import { statusLabel, statusVariant } from "@/lib/library-status";
 import { Badge } from "../ui/badge";
 import { BookCover } from "./book-cover";
 import Link from "next/link";

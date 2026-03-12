@@ -1,5 +1,5 @@
 import { BookReadingCard } from "@/components/dashboard/book-reading-card";
-import { BookSmallCard } from "@/components/dashboard/book-small-card";
+import { RecentlyAddedGrid } from "@/components/dashboard/recently-added-grid";
 import { SectionHeader } from "@/components/dashboard/section-header";
 import { Button } from "@/components/ui/button";
 import {
@@ -12,21 +12,7 @@ import { getLibraryBooks } from "@/lib/library-data";
 import { Book, BookCheck, BookOpen, Bookmark } from "lucide-react";
 import Link from "next/link";
 
-
-
-export const statusVariant = {
-  unread: "muted",
-  reading: "warning",
-  read: "success",
-  wishlist: "outline",
-} as const;
-
-export const statusLabel = {
-  unread: "Non letto",
-  reading: "In lettura",
-  read: "Letto",
-  wishlist: "Da comprare",
-} as const;
+export { statusLabel, statusVariant } from "@/lib/library-status";
 
 export default async function Home() {
   const books = await getLibraryBooks();
@@ -38,9 +24,9 @@ export default async function Home() {
     wishlist: books.filter((book) => book.status === "wishlist").length,
   };
   const currentlyReading = books.filter((book) => book.status === "reading");
-  const recentlyAdded = [...books]
-    .sort((a, b) => (a.addedAt < b.addedAt ? 1 : -1))
-    .slice(0, 5);
+  const recentlyAdded = [...books].sort((a, b) =>
+    a.addedAt < b.addedAt ? 1 : -1,
+  );
 
   return (
     <>
@@ -130,11 +116,7 @@ export default async function Home() {
           }
         />
 
-        <div className="flex flex-wrap gap-4">
-          {recentlyAdded.map((book) => (
-            <BookSmallCard key={book.id} book={book} />
-          ))}
-        </div>
+        <RecentlyAddedGrid books={recentlyAdded} />
       </section>
     </>
   );
