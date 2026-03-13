@@ -6,6 +6,7 @@ import {
   Book,
   BookCheck,
   Bookmark,
+  Calendar,
   Check,
   Globe,
   MapPin,
@@ -121,75 +122,100 @@ export default async function AuthorDetailsPage({
         </div>
 
         <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-3">
-            <div className="space-y-2 ">
-              <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+          <div className="space-y-6">
+            {/* Header autore */}
+            <div className="space-y-2">
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
                 {authorName}
               </h1>
-              <h5 className="text-lg font-medium text-muted-foreground">
-                {authorDetails?.birth_date
-                  ? formatDate(authorDetails.birth_date)
-                  : "Data di nascita non disponibile"}
-                {authorDetails?.death_date
-                  ? ` - ${formatDate(authorDetails.death_date)}`
-                  : ""}
-              </h5>
-              <p className="text-muted-foreground md:max-w-2xl lg:max-w-4xl text-sm leading-relaxed md:text-base">
+
+              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                {/* Date */}
+                <div className="flex items-center gap-2">
+                  <Calendar className="size-4" />
+                  <span>
+                    {authorDetails?.birth_date
+                      ? formatDate(authorDetails.birth_date)
+                      : "Data di nascita non disponibile"}
+                    {authorDetails?.death_date
+                      ? ` — ${formatDate(authorDetails.death_date)}`
+                      : ""}
+                  </span>
+                </div>
+
+                {/* Luogo */}
+                <div className="flex items-center gap-2">
+                  <MapPin className="size-4" />
+                  <span>
+                    {authorDetails?.birth_place ??
+                      "Luogo di nascita non disponibile"}
+                    {authorDetails?.nationality &&
+                      ` (${authorDetails.nationality})`}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Bio */}
+            <div className="rounded-xl border bg-muted/30 p-2">
+              <p className="text-sm md:text-base leading-relaxed text-muted-foreground md:max-w-3xl">
                 {bio ?? "Dati biografici non disponibili"}
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-              <span className="inline-flex items-center gap-2">
-                <MapPin className="size-4" />
-                {authorDetails?.birth_place ??
-                  "Luogo di nascita non disponibile"}
-                {authorDetails?.nationality
-                  ? ` (${authorDetails.nationality})`
-                  : ""}
-              </span>
+
+            {/* Link principali */}
+            <div className="flex flex-wrap gap-3">
               {wikipediaUrl && (
                 <Link
                   href={wikipediaUrl}
-                  className="inline-flex items-center gap-2 text-primary"
                   target="_blank"
                   rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted transition"
                 >
                   <Globe className="size-4" />
                   Wikipedia
                 </Link>
               )}
+
               {authorDetails?.website && (
                 <Link
                   href={authorDetails.website}
-                  className="inline-flex items-center gap-2 text-primary"
                   target="_blank"
                   rel="noreferrer"
+                  className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted transition"
                 >
                   <Globe className="size-4" />
                   Sito ufficiale
                 </Link>
               )}
             </div>
+
+            {/* Link aggiuntivi */}
             {extraLinks.length > 0 && (
-              <section className="space-y-3">
-                <div className="flex flex-wrap gap-3 text-sm">
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium text-muted-foreground">
+                  Altri collegamenti
+                </h4>
+
+                <div className="flex flex-wrap gap-2">
                   {extraLinks.map((link) => (
                     <Link
                       key={link.url}
                       href={link.url}
-                      className="inline-flex items-center gap-2 rounded-full border border-muted px-3 py-1 text-muted-foreground hover:text-foreground"
                       target="_blank"
                       rel="noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition"
                     >
                       {link.title ?? link.url}
                     </Link>
                   ))}
                 </div>
-              </section>
+              </div>
             )}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-2 lg:min-w-50">
+          <div className="flex flex-col gap-6 lg:min-w-72">
+            {" "}
             <Card>
               <CardHeader>
                 <div className="flex items-start justify-between gap-4">
