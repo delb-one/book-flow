@@ -22,7 +22,10 @@ import {
 } from "@/components/ui/card";
 import { BookSmallCard } from "@/components/dashboard/book-small-card";
 import { getLibraryBooks } from "@/lib/library-data";
-import { getLibraryAuthorsFromOpenLibrary } from "@/lib/open-library-authors";
+import {
+  getAuthorDetailsBySlug,
+  getLibraryAuthorsFromOpenLibrary,
+} from "@/lib/open-library-authors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function AuthorDetailsPage({
@@ -31,17 +34,22 @@ export default async function AuthorDetailsPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
-  const books = await getLibraryBooks();
+  const [books, authors, authorDetails] = await Promise.all([
+    getLibraryBooks(),
+    getLibraryAuthorsFromOpenLibrary(),
+    getAuthorDetailsBySlug(slug),
+  ]);
   const authorBooks = books.filter((book) => book.authorSlug === slug);
   const ownedBooks = authorBooks.filter((book) => book.status !== "wishlist");
-  const wishlistBooks = authorBooks.filter((book) => book.status === "wishlist");
+  const wishlistBooks = authorBooks.filter(
+    (book) => book.status === "wishlist",
+  );
 
   if (authorBooks.length === 0) {
     notFound();
   }
 
   const authorName = authorBooks[0].author;
-  const authors = await getLibraryAuthorsFromOpenLibrary();
   const authorInfo = authors.find((author) => author.slug === slug) ?? null;
   const totalOwnedBooks = ownedBooks.length;
   const totalWishlistBooks = wishlistBooks.length;
@@ -68,19 +76,27 @@ export default async function AuthorDetailsPage({
   const photoUrl = authorInfo?.photoUrl ?? wikipediaData?.photoUrl ?? null;
 
   const shouldPersist =
-    Boolean(authorInfo?.id && wikipediaData) &&
+    Boolean((authorInfo?.id ?? authorDetails?.id) && wikipediaData) &&
     ((!authorInfo?.bio && wikipediaData?.bio) ||
       (!authorInfo?.wikipediaUrl && wikipediaData?.url) ||
       (!authorInfo?.photoUrl && wikipediaData?.photoUrl));
 
   if (shouldPersist) {
     await maybePersistAuthorMetadata({
-      authorId: authorInfo?.id ?? null,
+      authorId: authorInfo?.id ?? authorDetails?.id ?? null,
       bio,
       wikipediaUrl,
       photoUrl,
     });
   }
+
+  const formattedBirthDate = formatDate(authorDetails?.birth_date ?? null);
+  const formattedDeathDate = formatDate(authorDetails?.death_date ?? null);
+  const lifeSpan =
+    formattedBirthDate || formattedDeathDate
+      ? [formattedBirthDate ?? "?", formattedDeathDate ?? "—"].join(" – ")
+      : null;
+  const extraLinks = normalizeLinks(authorDetails?.links);
 
   return (
     <div className="mx-auto w-full space-y-8">
@@ -110,6 +126,14 @@ export default async function AuthorDetailsPage({
               <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
                 {authorName}
               </h1>
+              <h5 className="text-lg font-medium text-muted-foreground">
+                {authorDetails?.birth_date
+                  ? formatDate(authorDetails.birth_date)
+                  : "Data di nascita non disponibile"}
+                {authorDetails?.death_date
+                  ? ` - ${formatDate(authorDetails.death_date)}`
+                  : ""}
+              </h5>
               <p className="text-muted-foreground md:max-w-2xl lg:max-w-4xl text-sm leading-relaxed md:text-base">
                 {bio ?? "Dati biografici non disponibili"}
               </p>
@@ -117,9 +141,11 @@ export default async function AuthorDetailsPage({
             <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
               <span className="inline-flex items-center gap-2">
                 <MapPin className="size-4" />
-                {!bio
-                  ? "Dati biografici non disponibili"
-                  : "Biografia da Wikipedia"}
+                {authorDetails?.birth_place ??
+                  "Luogo di nascita non disponibile"}
+                {authorDetails?.nationality
+                  ? ` (${authorDetails.nationality})`
+                  : ""}
               </span>
               {wikipediaUrl && (
                 <Link
@@ -132,7 +158,35 @@ export default async function AuthorDetailsPage({
                   Wikipedia
                 </Link>
               )}
+              {authorDetails?.website && (
+                <Link
+                  href={authorDetails.website}
+                  className="inline-flex items-center gap-2 text-primary"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Globe className="size-4" />
+                  Sito ufficiale
+                </Link>
+              )}
             </div>
+            {extraLinks.length > 0 && (
+              <section className="space-y-3">
+                <div className="flex flex-wrap gap-3 text-sm">
+                  {extraLinks.map((link) => (
+                    <Link
+                      key={link.url}
+                      href={link.url}
+                      className="inline-flex items-center gap-2 rounded-full border border-muted px-3 py-1 text-muted-foreground hover:text-foreground"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      {link.title ?? link.url}
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            )}
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-2 lg:min-w-50">
@@ -180,7 +234,6 @@ export default async function AuthorDetailsPage({
                   <Star className="size-5 text-primary" aria-hidden />
                 </div>
               </CardHeader>
-             
             </Card>
           </div>
         </div>
@@ -308,4 +361,34 @@ async function maybePersistAuthorMetadata({
   } catch {
     // Best-effort persistence; ignore failures
   }
+}
+
+function formatDate(value: string | null) {
+  if (!value) return null;
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return null;
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function normalizeLinks(value: unknown): { title?: string; url: string }[] {
+  if (!Array.isArray(value)) return [];
+  return value
+    .map((item) => {
+      if (!item || typeof item !== "object") return null;
+      const url =
+        typeof (item as { url?: unknown }).url === "string"
+          ? ((item as { url?: string }).url ?? "").trim()
+          : "";
+      if (!url) return null;
+      const title =
+        typeof (item as { title?: unknown }).title === "string"
+          ? ((item as { title?: string }).title ?? "").trim()
+          : undefined;
+      return { url, title: title || undefined };
+    })
+    .filter((item): item is { title?: string; url: string } => Boolean(item));
 }

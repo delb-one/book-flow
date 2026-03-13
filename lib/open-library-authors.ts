@@ -44,6 +44,16 @@ type AuthorAggregate = {
   openLibraryKey: string | null;
 };
 
+export type AuthorDetails = {
+  id: string;
+  birth_date: string | null;
+  birth_place: string | null;
+  death_date: string | null;
+  nationality: string | null;
+  website: string | null;
+  links: unknown | null;
+};
+
 function slugify(value: string) {
   return value
     .toLowerCase()
@@ -158,3 +168,29 @@ const getLibraryAuthorsCached = unstable_cache(
 export async function getLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> {
   return getLibraryAuthorsCached();
 }
+
+export async function getAuthorDetailsBySlug(
+  slug: string,
+): Promise<AuthorDetails | null> {
+  return getAuthorDetailsCached(slug);
+}
+
+const getAuthorDetailsCached = unstable_cache(
+  async (slug: string): Promise<AuthorDetails | null> => {
+    const supabase = createServerSupabaseClient();
+    const { data } = await supabase
+      .from("authors")
+      .select(
+        "id, birth_date, birth_place, death_date, nationality, website, links",
+      )
+      .eq("slug", slug)
+      .maybeSingle();
+
+    return (data ?? null) as AuthorDetails | null;
+  },
+  ["author-details"],
+  {
+    tags: ["library-authors"],
+    revalidate: 60,
+  },
+);
