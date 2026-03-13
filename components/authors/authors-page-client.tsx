@@ -1,11 +1,11 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search } from "lucide-react";
 
-import type { AuthorCard, AuthorsResponse } from "@/types/authors";
+import type { AuthorCard } from "@/types/authors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/pagination";
 
 const PAGE_SIZE = 8;
-const SKELETON_ITEMS = Array.from({ length: 8 }, (_, index) => index);
 
 type AuthorsPageClientProps = {
   authors?: AuthorCard[];
@@ -28,55 +27,9 @@ type AuthorsPageClientProps = {
 export function AuthorsPageClient({
   authors: initialAuthors = [],
 }: AuthorsPageClientProps) {
-  const hasInitialAuthors = initialAuthors.length > 0;
-  const [authors, setAuthors] = useState<AuthorCard[]>(initialAuthors);
-  const [isLoading, setIsLoading] = useState(!hasInitialAuthors);
-  const [error, setError] = useState<string | null>(null);
+  const authors = initialAuthors;
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
-
-  useEffect(() => {
-    let isCancelled = false;
-
-    async function loadAuthors() {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await fetch("/api/authors");
-        const payload = (await response.json()) as AuthorsResponse & {
-          error?: string;
-        };
-
-        if (!response.ok) {
-          throw new Error(payload.error || "Impossibile caricare gli autori.");
-        }
-
-        if (!isCancelled) {
-          setAuthors(payload.authors ?? []);
-        }
-      } catch (err) {
-        if (!isCancelled) {
-          setError(
-            err instanceof Error
-              ? err.message
-              : "Errore durante il caricamento.",
-          );
-          setAuthors([]);
-        }
-      } finally {
-        if (!isCancelled) setIsLoading(false);
-      }
-    }
-
-    if (!hasInitialAuthors) {
-      loadAuthors();
-    }
-
-    return () => {
-      isCancelled = true;
-    };
-  }, [hasInitialAuthors]);
 
   const filteredAuthors = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -138,152 +91,110 @@ export function AuthorsPageClient({
       <div className="text-sm text-muted-foreground">
         {filteredAuthors.length} autori trovati
       </div>
- <>
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {pagedAuthors.map((author) => (
-              <Link key={author.slug} href={`/authors/${author.slug}`}>
-                <Card className="group h-full rounded-2xl border border-muted/70 bg-card/80 transition-all hover:-translate-y-0.5 hover:shadow-md">
-                  <CardHeader className="items-center gap-2 pb-2 pt-6 text-center">
-                    <div className="relative mx-auto size-20 overflow-hidden rounded-full border border-muted/60 bg-muted/40">
-                      <Image
-                        src={author.photoUrl ?? "/images/author-placeholder.svg"}
-                        alt={`Ritratto di ${author.name}`}
-                        fill
-                        className="object-cover"
-                        sizes="80px"
-                      />
-                    </div>
-                    <CardTitle className="line-clamp-1 text-lg font-semibold">
-                      {author.name}
-                    </CardTitle>
-                    <div className="text-xs text-muted-foreground">
-                      {author.bookCount} Libri
-                    </div>
-                  </CardHeader>
-
-                  <CardContent className="pb-6">
-                    <div className="flex items-end justify-center gap-2">
-                      {author.covers.slice(0, 3).map((cover, index) => (
-                        <div
-                          key={`${author.id}-cover-${index}`}
-                          className="relative h-16 w-11 overflow-hidden rounded-md border border-muted/60 bg-linear-to-br from-muted/40 to-muted/80"
-                        >
-                          {cover ? (
-                            <Image
-                              src={cover}
-                              alt={`Copertina di ${author.name}`}
-                              fill
-                              className="object-cover"
-                              sizes="44px"
-                            />
-                          ) : (
-                            <div className="h-full w-full bg-muted/60" />
-                          )}
-                        </div>
-                      ))}
-                      {author.covers.length === 0 && (
-                        <>
-                          <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/50" />
-                          <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/40" />
-                          <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/30" />
-                        </>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
-          </section>
-
-          {totalPages > 1 && (
-            <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-              <div className="text-xs text-muted-foreground w-full">
-                Pagina {currentPage} di {totalPages}
-              </div>
-
-              <Pagination className="justify-end">
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious
-                      onClick={() => goToPage(currentPage - 1)}
-                      disabled={currentPage === 1}
-                      aria-disabled={currentPage === 1}
+      <>
+        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+          {pagedAuthors.map((author) => (
+            <Link key={author.slug} href={`/authors/${author.slug}`}>
+              <Card className="group h-full rounded-2xl border border-muted/70 bg-card/80 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                <CardHeader className="items-center gap-2 pb-2 pt-6 text-center">
+                  <div className="relative mx-auto size-20 overflow-hidden rounded-full border border-muted/60 bg-muted/40">
+                    <Image
+                      src={author.photoUrl ?? "/images/author-placeholder.svg"}
+                      alt={`Ritratto di ${author.name}`}
+                      fill
+                      className="object-cover"
+                      sizes="80px"
                     />
-                  </PaginationItem>
-                  {getVisiblePages(totalPages, currentPage).map(
-                    (item, index) =>
-                      item === "ellipsis" ? (
-                        <PaginationItem key={`ellipsis-${index}`}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      ) : (
-                        <PaginationItem key={item}>
-                          <PaginationLink
-                            href="#"
-                            onClick={(event) => {
-                              event.preventDefault();
-                              goToPage(item);
-                            }}
-                            isActive={item === currentPage}
-                          >
-                            {item}
-                          </PaginationLink>
-                        </PaginationItem>
-                      ),
-                  )}
-                  <PaginationItem>
-                    <PaginationNext
-                      onClick={() => goToPage(currentPage + 1)}
-                      disabled={currentPage === totalPages}
-                      aria-disabled={currentPage === totalPages}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
-        </>
-      {/* {isLoading ? (
-        <>
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {SKELETON_ITEMS.map((item) => (
-              <Card key={item} className="transition-all">
-                <CardHeader className="flex flex-col items-center gap-2 pb-2 pt-6 text-center">
-                  <div className="relative mx-auto size-20 overflow-hidden rounded-full border border-muted/60 bg-muted/40" />
-                  <div className="h-5 w-36 rounded bg-muted/60 animate-pulse" />
-                  <div className="h-3 w-16 rounded bg-muted/60 animate-pulse" />
+                  </div>
+                  <CardTitle className="line-clamp-1 text-lg font-semibold">
+                    {author.name}
+                  </CardTitle>
+                  <div className="text-xs text-muted-foreground">
+                    {author.bookCount} Libri
+                  </div>
                 </CardHeader>
 
                 <CardContent className="pb-6">
                   <div className="flex items-end justify-center gap-2">
-                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
-                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
-                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
+                    {author.covers.slice(0, 3).map((cover, index) => (
+                      <div
+                        key={`${author.id}-cover-${index}`}
+                        className="relative h-16 w-11 overflow-hidden rounded-md border border-muted/60 bg-linear-to-br from-muted/40 to-muted/80"
+                      >
+                        {cover ? (
+                          <Image
+                            src={cover}
+                            alt={`Copertina di ${author.name}`}
+                            fill
+                            className="object-cover"
+                            sizes="44px"
+                          />
+                        ) : (
+                          <div className="h-full w-full bg-muted/60" />
+                        )}
+                      </div>
+                    ))}
+                    {author.covers.length === 0 && (
+                      <>
+                        <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/50" />
+                        <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/40" />
+                        <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/30" />
+                      </>
+                    )}
                   </div>
                 </CardContent>
               </Card>
-            ))}
-          </section>
+            </Link>
+          ))}
+        </section>
 
+        {totalPages > 1 && (
           <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-            <div className="h-4 w-36 rounded bg-muted/60 animate-pulse" />
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-24 rounded bg-muted/60 animate-pulse" />
-              <div className="h-8 w-24 rounded bg-muted/60 animate-pulse" />
+            <div className="text-xs text-muted-foreground w-full">
+              Pagina {currentPage} di {totalPages}
             </div>
+
+            <Pagination className="justify-end">
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => goToPage(currentPage - 1)}
+                    disabled={currentPage === 1}
+                    aria-disabled={currentPage === 1}
+                  />
+                </PaginationItem>
+                {getVisiblePages(totalPages, currentPage).map((item, index) =>
+                  item === "ellipsis" ? (
+                    <PaginationItem key={`ellipsis-${index}`}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  ) : (
+                    <PaginationItem key={item}>
+                      <PaginationLink
+                        href="#"
+                        onClick={(event) => {
+                          event.preventDefault();
+                          goToPage(item);
+                        }}
+                        isActive={item === currentPage}
+                      >
+                        {item}
+                      </PaginationLink>
+                    </PaginationItem>
+                  ),
+                )}
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => goToPage(currentPage + 1)}
+                    disabled={currentPage === totalPages}
+                    aria-disabled={currentPage === totalPages}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
           </div>
-        </>
-      ) : error ? (
-        <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-destructive">
-          {error}
-        </div>
-      ) : filteredAuthors.length === 0 ? (
-        <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
-          Nessun autore trovato. Prova con un altro nome.
-        </div>
-      ) : (
-       
-      )} */}
+        )}
+      </>
     </div>
   );
 }
