@@ -6,6 +6,7 @@ type OpenLibraryDoc = {
   key?: string;
   title?: string;
   author_name?: string[];
+  author_key?: string[];
   first_publish_year?: number;
   publisher?: string[];
   cover_i?: number;
@@ -17,6 +18,7 @@ type SearchResult = {
   id: string;
   title: string;
   author: string;
+  authorKey: string | null;
   year: number | null;
   publisher: string | null;
   pages: number | null;
@@ -48,6 +50,7 @@ function mapDoc(doc: OpenLibraryDoc): SearchResult | null {
     id: key,
     title,
     author: doc.author_name?.[0] ?? "Autore sconosciuto",
+    authorKey: doc.author_key?.[0] ?? null,
     year: doc.first_publish_year ?? null,
     publisher: doc.publisher?.[0] ?? null,
     pages: doc.number_of_pages_median ?? null,
@@ -158,10 +161,10 @@ export async function GET() {
     const url = new URL("https://openlibrary.org/search.json");
     url.searchParams.set("q", `subject:"${category}"`);
     url.searchParams.set("limit", "12");
-    url.searchParams.set(
-      "fields",
-      "key,title,author_name,first_publish_year,publisher,subject,cover_i,number_of_pages_median",
-    );
+  url.searchParams.set(
+    "fields",
+    "key,title,author_name,author_key,first_publish_year,publisher,subject,cover_i,number_of_pages_median",
+  );
     url.searchParams.set("lang", "it");
 
     const response = await fetch(url.toString(), {

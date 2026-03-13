@@ -1,11 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search } from "lucide-react";
 
-import type { LibraryBook } from "@/lib/library-data";
+import type { AuthorCard, AuthorsResponse } from "@/types/authors";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -20,19 +20,59 @@ import {
 
 const PAGE_SIZE = 8;
 
-type AuthorCard = {
-  slug: string;
-  name: string;
-  books: LibraryBook[];
-};
-
 type AuthorsPageClientProps = {
-  authors: AuthorCard[];
+  authors?: AuthorCard[];
 };
 
-export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
+export function AuthorsPageClient({ authors: initialAuthors = [] }: AuthorsPageClientProps) {
+  const [authors, setAuthors] = useState<AuthorCard[]>(initialAuthors);
+  const [isLoading, setIsLoading] = useState(initialAuthors.length === 0);
+  const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    let isCancelled = false;
+
+    async function loadAuthors() {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await fetch("/api/authors");
+        const payload = (await response.json()) as AuthorsResponse & {
+          error?: string;
+        };
+
+        if (!response.ok) {
+          throw new Error(payload.error || "Impossibile caricare gli autori.");
+        }
+
+        if (!isCancelled) {
+          setAuthors(payload.authors ?? []);
+        }
+      } catch (err) {
+        if (!isCancelled) {
+          setError(
+            err instanceof Error
+              ? err.message
+              : "Errore durante il caricamento.",
+          );
+          setAuthors([]);
+        }
+      } finally {
+        if (!isCancelled) setIsLoading(false);
+      }
+    }
+
+    if (initialAuthors.length === 0) {
+      loadAuthors();
+    }
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [initialAuthors.length]);
 
   const filteredAuthors = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -95,7 +135,15 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
         {filteredAuthors.length} autori trovati
       </div>
 
-      {filteredAuthors.length === 0 ? (
+      {isLoading ? (
+        <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
+          Caricamento autori...
+        </div>
+      ) : error ? (
+        <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-destructive">
+          {error}
+        </div>
+      ) : filteredAuthors.length === 0 ? (
         <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
           Nessun autore trovato. Prova con un altro nome.
         </div>
@@ -108,7 +156,7 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
                   <CardHeader className="items-center gap-2 pb-2 pt-6 text-center">
                     <div className="relative mx-auto size-20 overflow-hidden rounded-full border border-muted/60 bg-muted/40">
                       <Image
-                        src="/images/author-placeholder.svg"
+                        src={author.photoUrl ?? "/images/author-placeholder.svg"}
                         alt={`Ritratto di ${author.name}`}
                         fill
                         className="object-cover"
@@ -119,21 +167,21 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
                       {author.name}
                     </CardTitle>
                     <div className="text-xs text-muted-foreground">
-                      {author.books.length} Libri
+                      {author.bookCount} Libri
                     </div>
                   </CardHeader>
 
                   <CardContent className="pb-6">
                     <div className="flex items-end justify-center gap-2">
-                      {author.books.slice(0, 3).map((book) => (
+                      {author.covers.slice(0, 3).map((cover, index) => (
                         <div
-                          key={book.id}
+                          key={`${author.id}-cover-${index}`}
                           className="relative h-16 w-11 overflow-hidden rounded-md border border-muted/60 bg-linear-to-br from-muted/40 to-muted/80"
                         >
-                          {book.cover ? (
+                          {cover ? (
                             <Image
-                              src={book.cover}
-                              alt={`Copertina di ${book.title}`}
+                              src={cover}
+                              alt={`Copertina di ${author.name}`}
                               fill
                               className="object-cover"
                               sizes="44px"
@@ -143,7 +191,7 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
                           )}
                         </div>
                       ))}
-                      {author.books.length === 0 && (
+                      {author.covers.length === 0 && (
                         <>
                           <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/50" />
                           <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/40" />

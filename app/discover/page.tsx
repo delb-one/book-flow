@@ -34,6 +34,7 @@ type SearchResult = {
   id: string;
   title: string;
   author: string;
+  authorKey: string | null;
   year: number | null;
   publisher: string | null;
   pages: number | null;
@@ -148,6 +149,7 @@ export default function DiscoverPage() {
         },
         body: JSON.stringify({
           ...selectedBook,
+          authorKey: selectedBook.authorKey,
           status,
           rating,
           notes,

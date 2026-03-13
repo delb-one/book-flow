@@ -7,6 +7,7 @@ type AddBookPayload = {
   id: string;
   title: string;
   author: string;
+  authorKey?: string | null;
   year?: number | null;
   publisher?: string | null;
   pages?: number | null;
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
   try {
     const { data: existingAuthor, error: authorSelectError } = await supabase
       .from("authors")
-      .select("id")
+      .select("id, openlibrary_key")
       .eq("slug", authorSlug)
       .maybeSingle();
 
@@ -68,6 +69,7 @@ export async function POST(request: NextRequest) {
           name: payload.author,
           slug: authorSlug,
           bio: null,
+          openlibrary_key: payload.authorKey ?? null,
         })
         .select("id")
         .single();
@@ -80,6 +82,18 @@ export async function POST(request: NextRequest) {
       }
 
       authorId = createdAuthor.id as string;
+    } else if (!existingAuthor.openlibrary_key && payload.authorKey) {
+      const { error: authorUpdateError } = await supabase
+        .from("authors")
+        .update({ openlibrary_key: payload.authorKey })
+        .eq("id", authorId);
+
+      if (authorUpdateError) {
+        return NextResponse.json(
+          { error: "Errore nell'aggiornamento autore." },
+          { status: 500 },
+        );
+      }
     }
 
     const { error: bookUpsertError } = await supabase.from("books").upsert(
@@ -154,4 +168,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
