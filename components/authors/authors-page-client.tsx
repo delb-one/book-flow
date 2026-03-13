@@ -19,6 +19,7 @@ import {
 } from "@/components/ui/pagination";
 
 const PAGE_SIZE = 8;
+const SKELETON_ITEMS = Array.from({ length: 8 }, (_, index) => index);
 
 type AuthorsPageClientProps = {
   authors?: AuthorCard[];
@@ -136,9 +137,35 @@ export function AuthorsPageClient({ authors: initialAuthors = [] }: AuthorsPageC
       </div>
 
       {isLoading ? (
-        <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
-          Caricamento autori...
-        </div>
+        <>
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {SKELETON_ITEMS.map((item) => (
+              <Card key={item} className="transition-all">
+                <CardHeader className="flex flex-col items-center gap-2 pb-2 pt-6 text-center">
+                  <div className="relative mx-auto size-20 overflow-hidden rounded-full border border-muted/60 bg-muted/40" />
+                  <div className="h-5 w-36 rounded bg-muted/60 animate-pulse" />
+                  <div className="h-3 w-16 rounded bg-muted/60 animate-pulse" />
+                </CardHeader>
+
+                <CardContent className="pb-6">
+                  <div className="flex items-end justify-center gap-2">
+                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
+                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
+                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+
+          <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+            <div className="h-4 w-36 rounded bg-muted/60 animate-pulse" />
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-24 rounded bg-muted/60 animate-pulse" />
+              <div className="h-8 w-24 rounded bg-muted/60 animate-pulse" />
+            </div>
+          </div>
+        </>
       ) : error ? (
         <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-destructive">
           {error}

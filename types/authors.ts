@@ -4,6 +4,7 @@ export type AuthorCard = {
   name: string;
   bookCount: number;
   covers: string[];
+  bio: string | null;
   photoUrl: string | null;
   wikipediaUrl: string | null;
   openLibraryKey: string | null;

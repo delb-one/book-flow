@@ -12,6 +12,7 @@ type LibraryAuthorRow = {
               id: string | null;
               name: string | null;
               slug: string | null;
+              bio: string | null;
               photo_url: string | null;
               wikipedia_url: string | null;
               openlibrary_key: string | null;
@@ -20,6 +21,7 @@ type LibraryAuthorRow = {
               id: string | null;
               name: string | null;
               slug: string | null;
+              bio: string | null;
               photo_url: string | null;
               wikipedia_url: string | null;
               openlibrary_key: string | null;
@@ -35,6 +37,7 @@ type AuthorAggregate = {
   name: string;
   covers: string[];
   bookIds: Set<string>;
+  bio: string | null;
   photoUrl: string | null;
   wikipediaUrl: string | null;
   openLibraryKey: string | null;
@@ -67,6 +70,7 @@ export async function getLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> 
           id,
           name,
           slug,
+          bio,
           photo_url,
           wikipedia_url,
           openlibrary_key
@@ -105,6 +109,7 @@ export async function getLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> 
         name,
         covers: [],
         bookIds: new Set(),
+        bio: author.bio ?? null,
         photoUrl: author.photo_url ?? null,
         wikipediaUrl: author.wikipedia_url ?? null,
         openLibraryKey,
@@ -131,6 +136,7 @@ export async function getLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> 
         name: author.name,
         bookCount: author.bookIds.size,
         covers: author.covers.slice(0, 3),
+        bio: author.bio ?? null,
         photoUrl,
         wikipediaUrl: author.wikipediaUrl,
         openLibraryKey: author.openLibraryKey,

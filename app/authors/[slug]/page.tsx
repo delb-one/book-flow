@@ -3,32 +3,26 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import {
   ArrowLeft,
-  BadgeCheck,
+  Book,
+  BookCheck,
+  Check,
   Globe,
   MapPin,
   Star,
 } from "lucide-react";
 
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { BookSmallCard } from "@/components/dashboard/book-small-card";
 import { getLibraryBooks } from "@/lib/library-data";
 import { getLibraryAuthorsFromOpenLibrary } from "@/lib/open-library-authors";
-import { cn, slugify } from "@/lib/utils";
-
-const statusLabel = {
-  unread: "Non letto",
-  reading: "In lettura",
-  read: "Letto",
-  wishlist: "Da comprare",
-} as const;
-
-const statusVariant = {
-  unread: "muted",
-  reading: "warning",
-  read: "success",
-  wishlist: "outline",
-} as const;
+import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 export default async function AuthorDetailsPage({
   params,
@@ -55,6 +49,30 @@ export default async function AuthorDetailsPage({
     ? ratings.reduce((sum, rating) => sum + rating, 0) / ratings.length
     : null;
 
+  const needsWikipedia =
+    !authorInfo?.bio || !authorInfo?.wikipediaUrl || !authorInfo?.photoUrl;
+  const wikipediaData = needsWikipedia
+    ? await getWikipediaSummary(authorName)
+    : null;
+  const wikipediaUrl = authorInfo?.wikipediaUrl ?? wikipediaData?.url ?? null;
+  const bio = authorInfo?.bio ?? wikipediaData?.bio ?? null;
+  const photoUrl = authorInfo?.photoUrl ?? wikipediaData?.photoUrl ?? null;
+
+  const shouldPersist =
+    Boolean(authorInfo?.id && wikipediaData) &&
+    ((!authorInfo?.bio && wikipediaData?.bio) ||
+      (!authorInfo?.wikipediaUrl && wikipediaData?.url) ||
+      (!authorInfo?.photoUrl && wikipediaData?.photoUrl));
+
+  if (shouldPersist) {
+    await maybePersistAuthorMetadata({
+      authorId: authorInfo?.id ?? null,
+      bio,
+      wikipediaUrl,
+      photoUrl,
+    });
+  }
+
   return (
     <div className="mx-auto w-full space-y-8">
       <div>
@@ -66,10 +84,10 @@ export default async function AuthorDetailsPage({
         </Button>
       </div>
 
-      <header className="flex flex-col gap-6 rounded-3xl bg-muted/30 p-6 md:flex-row md:items-center md:gap-8">
+      <header className="flex flex-col gap-6 rounded-3xl bg-muted/30 p-6 lg:flex-row lg:items-start lg:gap-8">
         <div className="relative mx-auto size-28 shrink-0 overflow-hidden rounded-full border-4 border-white bg-muted shadow-[0_8px_24px_rgba(15,23,42,0.12)] md:mx-0">
           <Image
-            src={authorInfo?.photoUrl ?? "/images/author-placeholder.svg"}
+            src={photoUrl ?? "/images/author-placeholder.svg"}
             alt={`Ritratto di ${authorName}`}
             fill
             className="object-cover"
@@ -77,140 +95,184 @@ export default async function AuthorDetailsPage({
           />
         </div>
 
-        <div className="space-y-3">
-          <div className="space-y-2">
-            <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
-              {authorName}
-            </h1>
-            <p className="text-muted-foreground max-w-2xl text-sm leading-relaxed md:text-base">
-              Autore presente nella tua libreria. Qui trovi i libri salvati e
-              le statistiche di lettura.
-            </p>
+        <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
+          <div className="space-y-3">
+            <div className="space-y-2 ">
+              <h1 className="text-3xl font-semibold tracking-tight md:text-4xl">
+                {authorName}
+              </h1>
+              <p className="text-muted-foreground md:max-w-2xl lg:max-w-4xl text-sm leading-relaxed md:text-base">
+                {bio ?? "Dati biografici non disponibili"}
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+              <span className="inline-flex items-center gap-2">
+                <MapPin className="size-4" />
+                {!bio
+                  ? "Dati biografici non disponibili"
+                  : "Biografia da Wikipedia"}
+              </span>
+              {wikipediaUrl && (
+                <Link
+                  href={wikipediaUrl}
+                  className="inline-flex items-center gap-2 text-primary"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <Globe className="size-4" />
+                  Wikipedia
+                </Link>
+              )}
+            </div>
           </div>
-          <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
-            <span className="inline-flex items-center gap-2">
-              <MapPin className="size-4" />
-              Dati biografici non disponibili
-            </span>
-            {authorInfo?.wikipediaUrl && (
-              <Link
-                href={authorInfo.wikipediaUrl}
-                className="inline-flex items-center gap-2 text-primary"
-                target="_blank"
-                rel="noreferrer"
-              >
-                <Globe className="size-4" />
-                Wikipedia
-              </Link>
-            )}
-            <span className="inline-flex items-center gap-2 text-primary">
-              <BadgeCheck className="size-4" />
-              Autore verificato
-            </span>
+
+          <div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-2 lg:min-w-50">
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardDescription className="text-sm">
+                      Libri posseduti
+                    </CardDescription>
+                    <CardTitle className="font-bold text-2xl">
+                      {totalBooks}
+                    </CardTitle>
+                  </div>
+                  <Book className="size-5 text-primary" aria-hidden />
+                </div>
+              </CardHeader>
+            </Card>
+            <Card>
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardDescription className="text-sm">
+                      Libri letti
+                    </CardDescription>
+                    <CardTitle className="font-bold text-2xl">
+                      {booksRead}
+                    </CardTitle>
+                  </div>
+                  <BookCheck className="size-5 text-primary" aria-hidden />
+                </div>
+              </CardHeader>
+            </Card>
+            <Card className="lg:col-span-2">
+              <CardHeader>
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <CardDescription className="text-sm">
+                      Media Voti
+                    </CardDescription>
+                    <CardTitle className="font-bold text-2xl">
+                      {averageRating ? averageRating.toFixed(1) : "n/a"}{" "}
+                    </CardTitle>
+                  </div>
+                  <Star className="size-5 text-primary" aria-hidden />
+                </div>
+              </CardHeader>
+             
+            </Card>
           </div>
         </div>
       </header>
 
-      <section className="space-y-3">
-        <h2 className="text-lg font-semibold">Reading Stats</h2>
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-          <Card>
-            <CardHeader className="pb-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Total Books
-              </p>
-            </CardHeader>
-            <CardContent className="flex items-center gap-3 pb-6">
-              <span className="text-3xl font-semibold">{totalBooks}</span>
-              <span className="text-primary text-sm">📘</span>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Books Read
-              </p>
-            </CardHeader>
-            <CardContent className="flex items-center gap-3 pb-6">
-              <span className="text-3xl font-semibold">{booksRead}</span>
-              <span className="text-emerald-600 text-sm">✓</span>
-            </CardContent>
-          </Card>
-          <Card>
-            <CardHeader className="pb-2">
-              <p className="text-xs uppercase tracking-wide text-muted-foreground">
-                Average Rating
-              </p>
-            </CardHeader>
-            <CardContent className="flex items-center gap-3 pb-6">
-              <span className="text-3xl font-semibold">
-                {averageRating ? averageRating.toFixed(1) : "—"}
-              </span>
-              <Star className="size-5 text-amber-400" />
-            </CardContent>
-          </Card>
-        </div>
-      </section>
-
       <section className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Books in Library</h2>
-          <Link href="/my-library" className="text-sm text-primary">
-            View All
-          </Link>
+          <h2 className="text-lg font-semibold">Libri posseduti</h2>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {authorBooks.map((book) => (
-          <Link key={book.id} href={`/my-library/${slugify(book.title)}`}>
-            <Card className="group overflow-hidden">
-              <div className="relative aspect-[3/4] w-full overflow-hidden bg-muted">
-                {book.cover ? (
-                  <Image
-                    src={book.cover}
-                    alt={`Copertina di ${book.title}`}
-                    fill
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs text-muted-foreground">
-                    No cover
-                  </div>
-                )}
-                <Badge
-                  variant={statusVariant[book.status]}
-                  className="absolute right-2 top-2"
-                >
-                  {statusLabel[book.status]}
-                </Badge>
-              </div>
-
-              <CardContent className="space-y-2 pb-5 pt-4">
-                <CardTitle className="line-clamp-1 text-base">
-                  {book.title}
-                </CardTitle>
-                <div className="flex items-center gap-1 text-amber-400">
-                  {Array.from({ length: 5 }, (_, index) => (
-                    <Star
-                      key={index}
-                      className={cn(
-                        "size-3",
-                        book.rating >= index + 1
-                          ? "fill-amber-400"
-                          : "fill-transparent text-muted-foreground/40",
-                      )}
-                    />
-                  ))}
-                  <span className="text-muted-foreground text-xs">
-                    {book.rating ? book.rating.toFixed(1) : "—"}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-        ))}
+        <div className="flex flex-wrap gap-4">
+          {authorBooks.map((book) => (
+            <BookSmallCard
+              key={book.id}
+              book={{
+                title: book.title,
+                author: book.author,
+                cover: book.cover,
+                status: book.status,
+              }}
+            />
+          ))}
         </div>
       </section>
     </div>
   );
+}
+
+async function getWikipediaSummary(authorName: string) {
+  const title = encodeURIComponent(authorName.trim().replace(/\s+/g, "_"));
+  if (!title) return null;
+
+  try {
+    const response = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${title}`,
+      { next: { revalidate: 60 * 60 * 24 } },
+    );
+
+    if (!response.ok) return null;
+
+    const payload = (await response.json()) as {
+      extract?: string;
+      content_urls?: {
+        desktop?: {
+          page?: string;
+        };
+      };
+      thumbnail?: {
+        source?: string;
+      };
+      originalimage?: {
+        source?: string;
+      };
+    };
+
+    const bio = payload.extract?.trim();
+    const url = payload.content_urls?.desktop?.page ?? null;
+    const photoUrl =
+      payload.originalimage?.source ?? payload.thumbnail?.source ?? null;
+
+    if (!bio && !url && !photoUrl) return null;
+
+    return {
+      bio: bio ?? null,
+      url,
+      photoUrl,
+    };
+  } catch {
+    return null;
+  }
+}
+
+async function maybePersistAuthorMetadata({
+  authorId,
+  bio,
+  wikipediaUrl,
+  photoUrl,
+}: {
+  authorId: string | null;
+  bio: string | null;
+  wikipediaUrl: string | null;
+  photoUrl: string | null;
+}) {
+  if (!authorId) return;
+
+  const updates: {
+    bio?: string;
+    wikipedia_url?: string;
+    photo_url?: string;
+  } = {};
+
+  if (bio) updates.bio = bio;
+  if (wikipediaUrl) updates.wikipedia_url = wikipediaUrl;
+  if (photoUrl) updates.photo_url = photoUrl;
+
+  if (Object.keys(updates).length === 0) return;
+
+  try {
+    const supabase = createServerSupabaseClient();
+    await supabase.from("authors").update(updates).eq("id", authorId);
+  } catch {
+    // Best-effort persistence; ignore failures
+  }
 }

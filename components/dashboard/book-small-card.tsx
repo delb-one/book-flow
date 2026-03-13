@@ -9,7 +9,7 @@ interface BookSmallCardProps {
     title: string;
     author: string;
     cover: string | null;
-    coverTone: string;
+    coverTone?: string;
     status: "unread" | "reading" | "read" | "wishlist";
   };
 }

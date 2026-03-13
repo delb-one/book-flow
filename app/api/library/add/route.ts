@@ -69,6 +69,8 @@ export async function POST(request: NextRequest) {
           name: payload.author,
           slug: authorSlug,
           bio: null,
+          photo_url: null,
+          wikipedia_url: null,
           openlibrary_key: payload.authorKey ?? null,
         })
         .select("id")
@@ -94,6 +96,18 @@ export async function POST(request: NextRequest) {
           { status: 500 },
         );
       }
+    }
+
+    const metadata = await getWikipediaSummary(payload.author);
+    if (metadata && authorId) {
+      await supabase
+        .from("authors")
+        .update({
+          bio: metadata.bio ?? null,
+          wikipedia_url: metadata.url ?? null,
+          photo_url: metadata.photoUrl ?? null,
+        })
+        .eq("id", authorId);
     }
 
     const { error: bookUpsertError } = await supabase.from("books").upsert(
@@ -166,5 +180,49 @@ export async function POST(request: NextRequest) {
       { error: "Errore imprevisto durante il salvataggio." },
       { status: 500 },
     );
+  }
+}
+
+async function getWikipediaSummary(authorName: string) {
+  const title = encodeURIComponent(authorName.trim().replace(/\s+/g, "_"));
+  if (!title) return null;
+
+  try {
+    const response = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${title}`,
+      { next: { revalidate: 60 * 60 * 24 } },
+    );
+
+    if (!response.ok) return null;
+
+    const payload = (await response.json()) as {
+      extract?: string;
+      content_urls?: {
+        desktop?: {
+          page?: string;
+        };
+      };
+      thumbnail?: {
+        source?: string;
+      };
+      originalimage?: {
+        source?: string;
+      };
+    };
+
+    const bio = payload.extract?.trim() ?? null;
+    const url = payload.content_urls?.desktop?.page ?? null;
+    const photoUrl =
+      payload.originalimage?.source ?? payload.thumbnail?.source ?? null;
+
+    if (!bio && !url && !photoUrl) return null;
+
+    return {
+      bio,
+      url,
+      photoUrl,
+    };
+  } catch {
+    return null;
   }
 }

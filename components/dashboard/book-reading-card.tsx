@@ -10,7 +10,7 @@ interface BookReadingCardProps {
     title: string;
     author: string;
     cover: string | null;
-    coverTone: string;
+    // coverTone: string;
     status: "unread" | "reading" | "read" | "wishlist";
     progress: number;
   };
@@ -24,7 +24,7 @@ export function BookReadingCard({ book }: BookReadingCardProps) {
       <BookCover
         cover={book.cover}
         title={book.title}
-        tone={book.coverTone}
+        // tone={book.coverTone}
         className="h-30 w-20"
       />
       
