@@ -3,12 +3,9 @@
 import { useMemo, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ArrowRight, Search } from "lucide-react";
+import { Search } from "lucide-react";
 
 import type { LibraryBook } from "@/lib/library-data";
-import { cn } from "@/lib/utils";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import {
@@ -106,33 +103,32 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
         <>
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {pagedAuthors.map((author) => (
-              <Card
-                key={author.slug}
-                className="transition-all hover:shadow-sm"
-              >
-                <CardHeader>
-                  <div className="mb-2 flex items-center justify-between gap-2">
-                    <CardTitle className="line-clamp-1 text-xl">
+              <Link key={author.slug} href={`/authors/${author.slug}`}>
+                <Card className="group h-full rounded-2xl border border-muted/70 bg-card/80 transition-all hover:-translate-y-0.5 hover:shadow-md">
+                  <CardHeader className="items-center gap-2 pb-2 pt-6 text-center">
+                    <div className="relative mx-auto size-20 overflow-hidden rounded-full border border-muted/60 bg-muted/40">
+                      <Image
+                        src="/images/author-placeholder.svg"
+                        alt={`Ritratto di ${author.name}`}
+                        fill
+                        className="object-cover"
+                        sizes="80px"
+                      />
+                    </div>
+                    <CardTitle className="line-clamp-1 text-lg font-semibold">
                       {author.name}
                     </CardTitle>
-                    <Badge variant="secondary">
-                      {author.books.length} libri
-                    </Badge>
-                  </div>
-                </CardHeader>
+                    <div className="text-xs text-muted-foreground">
+                      {author.books.length} Libri
+                    </div>
+                  </CardHeader>
 
-                <CardContent className="space-y-4 pb-6">
-                  <div className="flex items-end gap-2">
-                    {author.books.slice(0, 4).map((book, index) => {
-                      const sizeClass = index === 0 ? "h-24 w-16" : "h-20 w-14";
-
-                      return (
+                  <CardContent className="pb-6">
+                    <div className="flex items-end justify-center gap-2">
+                      {author.books.slice(0, 3).map((book) => (
                         <div
                           key={book.id}
-                          className={cn(
-                            "relative overflow-hidden rounded-md bg-linear-to-br",
-                            sizeClass,
-                          )}
+                          className="relative h-16 w-11 overflow-hidden rounded-md border border-muted/60 bg-linear-to-br from-muted/40 to-muted/80"
                         >
                           {book.cover ? (
                             <Image
@@ -140,27 +136,24 @@ export function AuthorsPageClient({ authors }: AuthorsPageClientProps) {
                               alt={`Copertina di ${book.title}`}
                               fill
                               className="object-cover"
+                              sizes="44px"
                             />
                           ) : (
-                            <div className="h-full w-full animate-pulse rounded-md bg-muted/60" />
+                            <div className="h-full w-full bg-muted/60" />
                           )}
                         </div>
-                      );
-                    })}
-                  </div>
-
-                  <Button
-                    asChild
-                    variant="outline"
-                    className="w-full justify-between"
-                  >
-                    <Link href={`/authors/${author.slug}`}>
-                      Vedi Libri
-                      <ArrowRight className="size-4" />
-                    </Link>
-                  </Button>
-                </CardContent>
-              </Card>
+                      ))}
+                      {author.books.length === 0 && (
+                        <>
+                          <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/50" />
+                          <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/40" />
+                          <div className="h-16 w-11 rounded-md border border-muted/60 bg-muted/30" />
+                        </>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </section>
 

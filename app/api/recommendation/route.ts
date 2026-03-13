@@ -162,7 +162,7 @@ export async function GET() {
       "fields",
       "key,title,author_name,first_publish_year,publisher,subject,cover_i,number_of_pages_median",
     );
-    url.searchParams.set("lang", "en");
+    url.searchParams.set("lang", "it");
 
     const response = await fetch(url.toString(), {
       next: { revalidate: 300 },

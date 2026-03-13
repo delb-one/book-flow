@@ -19,18 +19,9 @@ export type LibraryBook = {
   rating: number;
   addedAt: string;
   notes: string;
-  coverTone: "amber" | "emerald" | "rose" | "indigo" | "cyan" | "slate";
 };
 
-const tones = ["amber", "emerald", "rose", "indigo", "cyan", "slate"] as const;
 
-function toneFromSeed(seed: string): LibraryBook["coverTone"] {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i += 1) {
-    hash = (hash * 31 + seed.charCodeAt(i)) >>> 0;
-  }
-  return tones[hash % tones.length];
-}
 
 type LibraryJoinedRow = {
   book_id: string | null;
@@ -120,7 +111,6 @@ async function fetchLibraryBooks(): Promise<LibraryBook[]> {
         rating: row.rating ?? 0,
         addedAt: row.added_at ?? "",
         notes: row.notes ?? "",
-        coverTone: toneFromSeed(book.id),
       } satisfies LibraryBook;
     })
     .filter((book): book is LibraryBook => Boolean(book));

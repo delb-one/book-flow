@@ -108,12 +108,12 @@ export async function GET(request: NextRequest) {
   const url = new URL("https://openlibrary.org/search.json");
 
   url.searchParams.set("q", query);
-  url.searchParams.set("limit", "10");
+  url.searchParams.set("limit", "100");
   url.searchParams.set(
     "fields",
     "key,title,author_name,first_publish_year,publisher,subject,cover_i,number_of_pages_median",
   );
-  url.searchParams.set("lang", "en");
+  url.searchParams.set("mode", "everything");
 
   try {
     const response = await fetch(url.toString(), {
