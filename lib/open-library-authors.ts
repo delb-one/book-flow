@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { unstable_cache } from "next/cache";
 import type { AuthorCard } from "@/types/authors";
 
 type LibraryAuthorRow = {
@@ -57,7 +58,7 @@ function getAuthorPhotoUrl(openLibraryKey: string | null) {
   return `https://covers.openlibrary.org/a/olid/${openLibraryKey}-M.jpg`;
 }
 
-export async function getLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> {
+async function fetchLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> {
   const supabase = createServerSupabaseClient();
 
   const { data, error } = await supabase.from("library_books").select(
@@ -143,4 +144,17 @@ export async function getLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> 
       } satisfies AuthorCard;
     })
     .sort((a, b) => a.name.localeCompare(b.name));
+}
+
+const getLibraryAuthorsCached = unstable_cache(
+  fetchLibraryAuthorsFromOpenLibrary,
+  ["library-authors"],
+  {
+    tags: ["library-authors"],
+    revalidate: 60,
+  },
+);
+
+export async function getLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> {
+  return getLibraryAuthorsCached();
 }

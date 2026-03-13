@@ -5,6 +5,7 @@ import {
   ArrowLeft,
   Book,
   BookCheck,
+  Bookmark,
   Check,
   Globe,
   MapPin,
@@ -32,6 +33,8 @@ export default async function AuthorDetailsPage({
   const { slug } = await params;
   const books = await getLibraryBooks();
   const authorBooks = books.filter((book) => book.authorSlug === slug);
+  const ownedBooks = authorBooks.filter((book) => book.status !== "wishlist");
+  const wishlistBooks = authorBooks.filter((book) => book.status === "wishlist");
 
   if (authorBooks.length === 0) {
     notFound();
@@ -40,7 +43,13 @@ export default async function AuthorDetailsPage({
   const authorName = authorBooks[0].author;
   const authors = await getLibraryAuthorsFromOpenLibrary();
   const authorInfo = authors.find((author) => author.slug === slug) ?? null;
-  const totalBooks = authorBooks.length;
+  const totalOwnedBooks = ownedBooks.length;
+  const totalWishlistBooks = wishlistBooks.length;
+  const primaryCount =
+    totalOwnedBooks > 0 ? totalOwnedBooks : totalWishlistBooks;
+  const primaryLabel =
+    totalOwnedBooks > 0 ? "Libri posseduti" : "Libri da comprare";
+  const PrimaryIcon = totalOwnedBooks > 0 ? Book : Bookmark;
   const booksRead = authorBooks.filter((book) => book.status === "read").length;
   const ratings = authorBooks
     .map((book) => book.rating)
@@ -132,13 +141,13 @@ export default async function AuthorDetailsPage({
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <CardDescription className="text-sm">
-                      Libri posseduti
+                      {primaryLabel}
                     </CardDescription>
                     <CardTitle className="font-bold text-2xl">
-                      {totalBooks}
+                      {primaryCount}
                     </CardTitle>
                   </div>
-                  <Book className="size-5 text-primary" aria-hidden />
+                  <PrimaryIcon className="size-5 text-primary" aria-hidden />
                 </div>
               </CardHeader>
             </Card>
@@ -177,25 +186,49 @@ export default async function AuthorDetailsPage({
         </div>
       </header>
 
-      <section className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold">Libri posseduti</h2>
-        </div>
+      {ownedBooks.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Libri posseduti</h2>
+          </div>
 
-        <div className="flex flex-wrap gap-4">
-          {authorBooks.map((book) => (
-            <BookSmallCard
-              key={book.id}
-              book={{
-                title: book.title,
-                author: book.author,
-                cover: book.cover,
-                status: book.status,
-              }}
-            />
-          ))}
-        </div>
-      </section>
+          <div className="flex flex-wrap gap-4">
+            {ownedBooks.map((book) => (
+              <BookSmallCard
+                key={book.id}
+                book={{
+                  title: book.title,
+                  author: book.author,
+                  cover: book.cover,
+                  status: book.status,
+                }}
+              />
+            ))}
+          </div>
+        </section>
+      )}
+
+      {wishlistBooks.length > 0 && (
+        <section className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Da comprare</h2>
+          </div>
+
+          <div className="flex flex-wrap gap-4">
+            {wishlistBooks.map((book) => (
+              <BookSmallCard
+                key={book.id}
+                book={{
+                  title: book.title,
+                  author: book.author,
+                  cover: book.cover,
+                  status: book.status,
+                }}
+              />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 }

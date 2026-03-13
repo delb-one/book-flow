@@ -25,9 +25,12 @@ type AuthorsPageClientProps = {
   authors?: AuthorCard[];
 };
 
-export function AuthorsPageClient({ authors: initialAuthors = [] }: AuthorsPageClientProps) {
+export function AuthorsPageClient({
+  authors: initialAuthors = [],
+}: AuthorsPageClientProps) {
+  const hasInitialAuthors = initialAuthors.length > 0;
   const [authors, setAuthors] = useState<AuthorCard[]>(initialAuthors);
-  const [isLoading, setIsLoading] = useState(initialAuthors.length === 0);
+  const [isLoading, setIsLoading] = useState(!hasInitialAuthors);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
@@ -66,14 +69,14 @@ export function AuthorsPageClient({ authors: initialAuthors = [] }: AuthorsPageC
       }
     }
 
-    if (initialAuthors.length === 0) {
+    if (!hasInitialAuthors) {
       loadAuthors();
     }
 
     return () => {
       isCancelled = true;
     };
-  }, [initialAuthors.length]);
+  }, [hasInitialAuthors]);
 
   const filteredAuthors = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -135,47 +138,7 @@ export function AuthorsPageClient({ authors: initialAuthors = [] }: AuthorsPageC
       <div className="text-sm text-muted-foreground">
         {filteredAuthors.length} autori trovati
       </div>
-
-      {isLoading ? (
-        <>
-          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            {SKELETON_ITEMS.map((item) => (
-              <Card key={item} className="transition-all">
-                <CardHeader className="flex flex-col items-center gap-2 pb-2 pt-6 text-center">
-                  <div className="relative mx-auto size-20 overflow-hidden rounded-full border border-muted/60 bg-muted/40" />
-                  <div className="h-5 w-36 rounded bg-muted/60 animate-pulse" />
-                  <div className="h-3 w-16 rounded bg-muted/60 animate-pulse" />
-                </CardHeader>
-
-                <CardContent className="pb-6">
-                  <div className="flex items-end justify-center gap-2">
-                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
-                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
-                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </section>
-
-          <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
-            <div className="h-4 w-36 rounded bg-muted/60 animate-pulse" />
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-24 rounded bg-muted/60 animate-pulse" />
-              <div className="h-8 w-24 rounded bg-muted/60 animate-pulse" />
-            </div>
-          </div>
-        </>
-      ) : error ? (
-        <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-destructive">
-          {error}
-        </div>
-      ) : filteredAuthors.length === 0 ? (
-        <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
-          Nessun autore trovato. Prova con un altro nome.
-        </div>
-      ) : (
-        <>
+ <>
           <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
             {pagedAuthors.map((author) => (
               <Link key={author.slug} href={`/authors/${author.slug}`}>
@@ -280,7 +243,47 @@ export function AuthorsPageClient({ authors: initialAuthors = [] }: AuthorsPageC
             </div>
           )}
         </>
-      )}
+      {/* {isLoading ? (
+        <>
+          <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {SKELETON_ITEMS.map((item) => (
+              <Card key={item} className="transition-all">
+                <CardHeader className="flex flex-col items-center gap-2 pb-2 pt-6 text-center">
+                  <div className="relative mx-auto size-20 overflow-hidden rounded-full border border-muted/60 bg-muted/40" />
+                  <div className="h-5 w-36 rounded bg-muted/60 animate-pulse" />
+                  <div className="h-3 w-16 rounded bg-muted/60 animate-pulse" />
+                </CardHeader>
+
+                <CardContent className="pb-6">
+                  <div className="flex items-end justify-center gap-2">
+                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
+                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
+                    <div className="h-16 w-11 rounded-md bg-muted/60 animate-pulse" />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </section>
+
+          <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
+            <div className="h-4 w-36 rounded bg-muted/60 animate-pulse" />
+            <div className="flex items-center gap-2">
+              <div className="h-8 w-24 rounded bg-muted/60 animate-pulse" />
+              <div className="h-8 w-24 rounded bg-muted/60 animate-pulse" />
+            </div>
+          </div>
+        </>
+      ) : error ? (
+        <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-destructive">
+          {error}
+        </div>
+      ) : filteredAuthors.length === 0 ? (
+        <div className="rounded-lg border border-dashed px-6 py-10 text-center text-sm text-muted-foreground">
+          Nessun autore trovato. Prova con un altro nome.
+        </div>
+      ) : (
+       
+      )} */}
     </div>
   );
 }

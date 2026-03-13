@@ -102,9 +102,14 @@ export default async function MyLibraryBookPage({
 
         <div className="space-y-6">
           <header className="space-y-2">
-            <p className="text-muted-foreground text-sm">
-              di <span className="font-semibold text-foreground">{book.author}</span>
-            </p>
+            <Link href={`/authors/${book.authorSlug}`}>
+              <p className="text-muted-foreground text-sm">
+                di{" "}
+                <span className="font-semibold text-foreground">
+                  {book.author}
+                </span>
+              </p>
+            </Link>
             <h1 className="text-3xl font-semibold tracking-tight">
               {book.title}
             </h1>
@@ -139,7 +144,6 @@ export default async function MyLibraryBookPage({
                   {book.pages ? `${book.pages} pagine` : "-"}
                 </p>
               </div>
-              
             </CardContent>
           </Card>
 
