@@ -1,50 +1,16 @@
 ﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
-import {
-  Bookmark,
-  BookOpen,
-  CheckCircle2,
-  Loader2,
-  Search,
-  Star,
-} from "lucide-react";
-import Image from "next/image";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import {
-  Dialog,
-  DialogClose,
-  DialogContent,
-  DialogFooter,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { DiscoverAddDialog } from "@/components/discover/discover-add-dialog";
+import { DiscoverEmptyState } from "@/components/discover/discover-empty-state";
+import { DiscoverResultsGrid } from "@/components/discover/discover-results-grid";
+import { DiscoverResultsTable } from "@/components/discover/discover-results-table";
+import { DiscoverSearchCard } from "@/components/discover/discover-search-card";
+import type { AddStatus, SearchResult, ViewMode } from "@/components/discover/types";
 
-type SearchResult = {
-  id: string;
-  title: string;
-  author: string;
-  authorKey: string | null;
-  year: number | null;
-  publisher: string | null;
-  pages: number | null;
-  cover: string | null;
-  categories: string[];
-  description: string;
-  source: "openlibrary";
-};
-
-type AddStatus = "unread" | "reading" | "read" | "wishlist";
+const TABLE_PAGE_SIZE = 20;
+const GRID_PAGE_SIZE = 24;
 
 export default function DiscoverPage() {
   const [query, setQuery] = useState("");
@@ -70,6 +36,9 @@ export default function DiscoverPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedBookIds, setSavedBookIds] = useState<Set<string>>(new Set());
+  const [viewMode, setViewMode] = useState<ViewMode>("table");
+  const [tablePage, setTablePage] = useState(1);
+  const [gridPage, setGridPage] = useState(1);
 
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -134,6 +103,42 @@ export default function DiscoverPage() {
     () => results.find((result) => result.id === selectedBookId) ?? null,
     [results, selectedBookId],
   );
+
+  const tableTotalPages = Math.max(
+    1,
+    Math.ceil(results.length / TABLE_PAGE_SIZE),
+  );
+  const currentTablePage = Math.min(tablePage, tableTotalPages);
+
+  const gridTotalPages = Math.max(
+    1,
+    Math.ceil(results.length / GRID_PAGE_SIZE),
+  );
+  const currentGridPage = Math.min(gridPage, gridTotalPages);
+
+  const pagedTableResults = useMemo(() => {
+    const start = (currentTablePage - 1) * TABLE_PAGE_SIZE;
+    return results.slice(start, start + TABLE_PAGE_SIZE);
+  }, [currentTablePage, results]);
+
+  const pagedGridResults = useMemo(() => {
+    const start = (currentGridPage - 1) * GRID_PAGE_SIZE;
+    return results.slice(start, start + GRID_PAGE_SIZE);
+  }, [currentGridPage, results]);
+
+  useEffect(() => {
+    setTablePage(1);
+    setGridPage(1);
+  }, [results]);
+
+  useEffect(() => {
+    if (tablePage > tableTotalPages) {
+      setTablePage(tableTotalPages);
+    }
+    if (gridPage > gridTotalPages) {
+      setGridPage(gridTotalPages);
+    }
+  }, [gridPage, gridTotalPages, tablePage, tableTotalPages]);
 
   async function handleAddBook() {
     if (!selectedBook) return;
@@ -236,315 +241,102 @@ export default function DiscoverPage() {
   }
 
   return (
-    <div className="mx-auto w-full space-y-6">
-      
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex flex-1 min-h-0 flex-col gap-6">
+        <DiscoverSearchCard
+          query={query}
+          onQueryChange={(value) => {
+            setIsRecommendationMode(false);
+            setRecommendationReason(null);
+            setRecommendationError(null);
+            setQuery(value);
+          }}
+          onRecommend={handleRecommend}
+          isLoading={isLoading}
+          isRecommending={isRecommending}
+          searchError={searchError}
+          recommendationError={recommendationError}
+          recommendationReason={recommendationReason}
+          resultsCount={results.length}
+          viewMode={viewMode}
+          onViewModeChange={setViewMode}
+        />
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Ricerca</CardTitle>
-          <CardDescription>
-            Inserisci titolo o autore (minimo 2 caratteri)
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3 pb-6">
-          <div className="relative w-full max-w-xl flex items-center gap-2">
-            <div>
-              <Search className="text-muted-foreground absolute top-1/2 left-2 size-4 -translate-y-1/2" />
-              <Input
-                value={query}
-                onChange={(event) => {
-                  setIsRecommendationMode(false);
-                  setRecommendationReason(null);
-                  setRecommendationError(null);
-                  setQuery(event.target.value);
-                }}
-                className="pl-8"
-                placeholder="Es. Dune, Calvino, Tolkien..."
-              />
-            </div>
-            <Button
-              variant="default"
-              onClick={handleRecommend}
-              disabled={isLoading || isRecommending}
-            >
-              {isRecommending ? "Consiglio in corso..." : "Consigliami un libro"}
-            </Button>
-          </div>
-
-          {isLoading && (
-            <div className="text-muted-foreground flex items-center gap-2 text-sm">
-              <Loader2 className="size-4 animate-spin" />
-              Ricerca in corso...
-            </div>
+        <div
+          className={`min-h-0 flex-1 rounded-lg pr-4 ${
+            viewMode === "table"
+              ? "overflow-hidden"
+              : "overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+          }`}
+        >
+          {results.length > 0 && viewMode === "grid" && (
+            <DiscoverResultsGrid
+              results={pagedGridResults}
+              savedBookIds={savedBookIds}
+              currentPage={currentGridPage}
+              totalPages={gridTotalPages}
+              onPageChange={setGridPage}
+              onAddClick={(book) => {
+                setSaveError(null);
+                setSelectedBookId(book.id);
+                setStatus("unread");
+                setRating(0);
+                setNotes("");
+                setIsDialogOpen(true);
+              }}
+            />
           )}
 
-          {searchError && (
-            <p className="text-destructive text-sm">{searchError}</p>
+          {results.length > 0 && viewMode === "table" && (
+            <DiscoverResultsTable
+              results={pagedTableResults}
+              savedBookIds={savedBookIds}
+              currentPage={currentTablePage}
+              totalPages={tableTotalPages}
+              onPageChange={setTablePage}
+              onAddClick={(book) => {
+                setSaveError(null);
+                setSelectedBookId(book.id);
+                setStatus("unread");
+                setRating(0);
+                setNotes("");
+                setIsDialogOpen(true);
+              }}
+            />
           )}
+        </div>
 
-          {recommendationError && (
-            <p className="text-destructive text-sm">{recommendationError}</p>
-          )}
+        <DiscoverAddDialog
+          open={isDialogOpen}
+          onOpenChange={(open) => {
+            setIsDialogOpen(open);
+            if (!open) {
+              setSelectedBookId(null);
+              setSaveError(null);
+            }
+          }}
+          selectedBook={selectedBook}
+          status={status}
+          onStatusChange={setStatus}
+          rating={rating}
+          onRatingChange={setRating}
+          notes={notes}
+          onNotesChange={setNotes}
+          onConfirm={handleAddBook}
+          isSaving={isSaving}
+          saveError={saveError}
+        />
 
-          {recommendationReason && (
-            <p className="text-muted-foreground text-xs">
-              {recommendationReason}
-            </p>
-          )}
-        </CardContent>
-      </Card>
-
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
-        {results.map((book) => {
-          const isSaved = savedBookIds.has(book.id);
-
-          return (
-            <Card key={book.id}>
-              <CardHeader>
-                <div className="mb-2 flex gap-3">
-                  <div className="bg-muted h-28 w-20 shrink-0 overflow-hidden rounded-md">
-                    {book.cover ? (
-                      <Image
-                        src={book.cover}
-                        alt={`Copertina di ${book.title}`}
-                        className="h-full w-full object-cover"
-                        width={80}
-                        height={112}
-                        unoptimized
-                      />
-                    ) : (
-                      <div className="text-muted-foreground flex h-full items-center justify-center text-xs">
-                        No cover
-                      </div>
-                    )}
-                  </div>
-                  <div className="min-w-0 space-y-1">
-                    <CardTitle className="line-clamp-2 text-lg">
-                      {book.title}
-                    </CardTitle>
-                    <p className="text-muted-foreground line-clamp-1 text-sm">
-                      {book.author}
-                    </p>
-                    <div className="text-muted-foreground flex flex-wrap gap-2 text-xs">
-                      {book.year && <span>{book.year}</span>}
-                      {book.publisher && <span>{book.publisher}</span>}
-                    </div>
-                  </div>
-                </div>
-                <div className="flex flex-wrap gap-1">
-                  {(book.categories.length
-                    ? book.categories
-                    : ["Senza categoria"]
-                  )
-                    .slice(0, 3)
-                    .map((category) => (
-                      <Badge key={category} variant="outline">
-                        {category}
-                      </Badge>
-                    ))}
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-3 pb-6">
-                <Button
-                  onClick={() => {
-                    if (isSaved) return;
-                    setSaveError(null);
-                    setSelectedBookId(book.id);
-                    setStatus("unread");
-                    setRating(0);
-                    setNotes("");
-                    setIsDialogOpen(true);
-                  }}
-                  variant={isSaved ? "secondary" : "default"}
-                  disabled={isSaved}
-                  className="w-full"
-                >
-                  {isSaved
-                    ? "Già aggiunto in questa sessione"
-                    : "Aggiungi alla libreria"}
-                </Button>
-              </CardContent>
-            </Card>
-          );
-        })}
-      </section>
-
-      <Dialog
-        open={isDialogOpen}
-        onOpenChange={(open) => {
-          setIsDialogOpen(open);
-          if (!open) {
-            setSelectedBookId(null);
-            setSaveError(null);
+        <DiscoverEmptyState
+          show={
+            !isLoading &&
+            !isRecommendationMode &&
+            debouncedQuery.length >= 2 &&
+            results.length === 0 &&
+            !searchError
           }
-        }}
-      >
-        <DialogContent className="sm:max-w-2xl">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="text-primary bg-primary/10 flex size-9 items-center justify-center rounded-lg">
-                <Bookmark className="size-4" />
-              </div>
-              <DialogTitle>Aggiungi alla libreria</DialogTitle>
-            </div>
-          </div>
-
-          <div className="space-y-6 px-6 py-5">
-            {selectedBook && (
-              <div className="flex gap-4">
-                <div className="bg-muted h-28 w-20 shrink-0 overflow-hidden rounded-lg">
-                  {selectedBook.cover ? (
-                    <Image
-                      src={selectedBook.cover}
-                      alt={`Copertina di ${selectedBook.title}`}
-                      className="h-full w-full object-cover"
-                      width={80}
-                      height={112}
-                      unoptimized
-                    />
-                  ) : (
-                    <div className="text-muted-foreground flex h-full items-center justify-center text-xs">
-                      No cover
-                    </div>
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <p className="text-base font-semibold">
-                    {selectedBook.title}
-                  </p>
-                  <p className="text-muted-foreground text-sm">
-                    {selectedBook.author}
-                  </p>
-                  <div className="flex flex-wrap gap-2 text-xs">
-                    {(selectedBook.categories.length
-                      ? selectedBook.categories
-                      : ["Senza categoria"]
-                    )
-                      .slice(0, 2)
-                      .map((category) => (
-                        <Badge key={category} variant="outline">
-                          {category}
-                        </Badge>
-                      ))}
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div className="space-y-3">
-              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
-                Stato lettura
-              </p>
-              <div className="grid gap-2 sm:grid-cols-4">
-                {[
-                  { value: "unread", label: "Non letto", icon: BookOpen },
-                  { value: "reading", label: "In lettura", icon: BookOpen },
-                  { value: "read", label: "Letto", icon: CheckCircle2 },
-                  { value: "wishlist", label: "Da comprare", icon: Bookmark },
-                ].map(({ value, label, icon: Icon }) => {
-                  const isActive = status === value;
-                  return (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setStatus(value as AddStatus)}
-                      className={`border-input flex flex-col items-center gap-2 rounded-lg border px-3 py-3 text-xs font-medium transition cursor-pointer ${
-                        isActive
-                          ? "bg-primary/10 text-primary border-primary/40 shadow-sm"
-                          : "bg-background text-foreground/80 hover:border-primary/30"
-                      }`}
-                    >
-                      <Icon className="size-4" />
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
-                La tua valutazione
-              </p>
-              <div className="flex items-center gap-2">
-                <div className="flex items-center gap-0.5 group">
-                  {Array.from({ length: 5 }, (_, index) => {
-                    const value = index + 1;
-                    const filled = value <= rating;
-
-                    return (
-                      <button
-                        key={value}
-                        type="button"
-                        onClick={() => setRating(value)}
-                        aria-label={`Valuta ${value} su 5`}
-                        className="cursor-pointer transition-transform duration-150 hover:scale-110 hover:drop-shadow-[0_0_4px_rgba(251,191,36,0.8)]"
-                      >
-                        <Star
-                          className={`
-              size-4 transition-all duration-150
-              ${
-                filled
-                  ? "fill-amber-400 text-amber-400"
-                  : "text-muted-foreground/40"
-              }
-              group-hover:text-amber-300
-            `}
-                        />
-                      </button>
-                    );
-                  })}
-                </div>
-
-                <span className="text-sm font-medium">
-                  {rating ? rating + "/5" : ""}
-                </span>
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
-                Note personali (opzionale)
-              </p>
-              <Textarea
-                value={notes}
-                onChange={(event) => setNotes(event.target.value)}
-                placeholder="Aggiungi le tue impressioni..."
-                className="min-h-28"
-              />
-            </div>
-
-            {saveError && (
-              <p className="text-destructive text-sm">{saveError}</p>
-            )}
-          </div>
-
-          <DialogFooter>
-            {/* <DialogClose asChild>
-              <Button variant="ghost">Annulla</Button>
-            </DialogClose> */}
-            <Button
-              onClick={handleAddBook}
-              disabled={isSaving || !selectedBook}
-            >
-              {isSaving ? "Salvataggio..." : "Aggiungi alla libreria"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {!isLoading &&
-        !isRecommendationMode &&
-        debouncedQuery.length >= 2 &&
-        results.length === 0 &&
-        !searchError && (
-          <Card>
-            <CardContent className="text-muted-foreground py-8 text-center text-sm">
-              Nessun risultato trovato.
-            </CardContent>
-          </Card>
-        )}
+        />
+      </div>
     </div>
   );
 }

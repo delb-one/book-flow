@@ -136,12 +136,9 @@ export async function GET(request: NextRequest) {
       .map(mapDoc)
       .filter((r): r is SearchResult => Boolean(r));
 
-    const enriched = await Promise.all(
-      mapped.slice(0, 5).map(enrichWork)
-    );
+    const enriched = await Promise.all(mapped.map(enrichWork));
 
-    console.log(enriched);
-    
+    // console.log(enriched);
 
     return NextResponse.json({ results: enriched });
   } catch {
