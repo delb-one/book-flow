@@ -1,9 +1,9 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { DiscoverSearchCard } from "./discover-search-card";
+import { SearchCard } from "./search-card";
 
-const meta: Meta<typeof DiscoverSearchCard> = {
-  title: "Discover/DiscoverSearchCard",
-  component: DiscoverSearchCard,
+const meta: Meta<typeof SearchCard> = {
+  title: "Discover/SearchCard",
+  component: SearchCard,
   args: {
     query: "",
     onQueryChange: () => {},
@@ -28,7 +28,7 @@ const meta: Meta<typeof DiscoverSearchCard> = {
 
 export default meta;
 
-type Story = StoryObj<typeof DiscoverSearchCard>;
+type Story = StoryObj<typeof SearchCard>;
 
 export const Default: Story = {};
 

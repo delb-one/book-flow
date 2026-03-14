@@ -2,11 +2,11 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 
-interface DiscoverEmptyStateProps {
+interface EmptyStateProps {
   show: boolean;
 }
 
-export function DiscoverEmptyState({ show }: DiscoverEmptyStateProps) {
+export function EmptyState({ show }: EmptyStateProps) {
   if (!show) return null;
 
   return (

@@ -9,7 +9,7 @@ import { PaginationSticky } from "@/components/my-library/pagination-sticky";
 
 import type { SearchResult } from "./types";
 
-interface DiscoverResultsGridProps {
+interface ResultsGridProps {
   results: SearchResult[];
   savedBookIds: Set<string>;
   onAddClick: (book: SearchResult) => void;
@@ -18,14 +18,14 @@ interface DiscoverResultsGridProps {
   onPageChange: (page: number) => void;
 }
 
-export function DiscoverResultsGrid({
+export function ResultsGrid({
   results,
   savedBookIds,
   onAddClick,
   currentPage,
   totalPages,
   onPageChange,
-}: DiscoverResultsGridProps) {
+}: ResultsGridProps) {
   return (
     <>
       <div className="pb-14">

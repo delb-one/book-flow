@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { DiscoverAddDialog } from "./discover-add-dialog";
+import { AddDialog } from "./add-dialog";
 import type { AddStatus, SearchResult } from "./types";
 
 const sampleBook: SearchResult = {
@@ -17,9 +17,9 @@ const sampleBook: SearchResult = {
   source: "openlibrary",
 };
 
-const meta: Meta<typeof DiscoverAddDialog> = {
-  title: "Discover/DiscoverAddDialog",
-  component: DiscoverAddDialog,
+const meta: Meta<typeof AddDialog> = {
+  title: "Discover/AddDialog",
+  component: AddDialog,
   args: {
     open: true,
     onOpenChange: () => {},
@@ -40,7 +40,7 @@ const meta: Meta<typeof DiscoverAddDialog> = {
     const [notes, setNotes] = useState(args.notes);
 
     return (
-      <DiscoverAddDialog
+      <AddDialog
         {...args}
         status={status}
         onStatusChange={setStatus}
@@ -55,7 +55,7 @@ const meta: Meta<typeof DiscoverAddDialog> = {
 
 export default meta;
 
-type Story = StoryObj<typeof DiscoverAddDialog>;
+type Story = StoryObj<typeof AddDialog>;
 
 export const Default: Story = {};
 

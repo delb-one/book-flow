@@ -14,7 +14,7 @@ import { Input } from "@/components/ui/input";
 
 import type { ViewMode } from "./types";
 
-interface DiscoverSearchCardProps {
+interface SearchCardProps {
   query: string;
   onQueryChange: (value: string) => void;
   onRecommend: () => void;
@@ -28,7 +28,7 @@ interface DiscoverSearchCardProps {
   onViewModeChange: (mode: ViewMode) => void;
 }
 
-export function DiscoverSearchCard({
+export function SearchCard({
   query,
   onQueryChange,
   onRecommend,
@@ -40,7 +40,7 @@ export function DiscoverSearchCard({
   resultsCount,
   viewMode,
   onViewModeChange,
-}: DiscoverSearchCardProps) {
+}: SearchCardProps) {
   return (
     <Card>
       <CardHeader>

@@ -15,7 +15,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 import type { AddStatus, SearchResult } from "./types";
 
-interface DiscoverAddDialogProps {
+interface AddDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   selectedBook: SearchResult | null;
@@ -30,7 +30,7 @@ interface DiscoverAddDialogProps {
   saveError: string | null;
 }
 
-export function DiscoverAddDialog({
+export function AddDialog({
   open,
   onOpenChange,
   selectedBook,
@@ -43,7 +43,7 @@ export function DiscoverAddDialog({
   onConfirm,
   isSaving,
   saveError,
-}: DiscoverAddDialogProps) {
+}: AddDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">

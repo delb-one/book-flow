@@ -2,11 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { DiscoverAddDialog } from "@/components/discover/discover-add-dialog";
-import { DiscoverEmptyState } from "@/components/discover/discover-empty-state";
-import { DiscoverResultsGrid } from "@/components/discover/discover-results-grid";
-import { DiscoverResultsTable } from "@/components/discover/discover-results-table";
-import { DiscoverSearchCard } from "@/components/discover/discover-search-card";
+import { AddDialog } from "@/components/discover/add-dialog";
+import { EmptyState } from "@/components/discover/empty-state";
+import { ResultsGrid } from "@/components/discover/results-grid";
+import { ResultsTable } from "@/components/discover/results-table";
+import { SearchCard } from "@/components/discover/search-card";
 import type { AddStatus, SearchResult, ViewMode } from "@/components/discover/types";
 
 const TABLE_PAGE_SIZE = 20;
@@ -243,7 +243,7 @@ export default function DiscoverPage() {
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex flex-1 min-h-0 flex-col gap-6">
-        <DiscoverSearchCard
+        <SearchCard
           query={query}
           onQueryChange={(value) => {
             setIsRecommendationMode(false);
@@ -270,7 +270,7 @@ export default function DiscoverPage() {
           }`}
         >
           {results.length > 0 && viewMode === "grid" && (
-            <DiscoverResultsGrid
+            <ResultsGrid
               results={pagedGridResults}
               savedBookIds={savedBookIds}
               currentPage={currentGridPage}
@@ -288,7 +288,7 @@ export default function DiscoverPage() {
           )}
 
           {results.length > 0 && viewMode === "table" && (
-            <DiscoverResultsTable
+            <ResultsTable
               results={pagedTableResults}
               savedBookIds={savedBookIds}
               currentPage={currentTablePage}
@@ -306,7 +306,7 @@ export default function DiscoverPage() {
           )}
         </div>
 
-        <DiscoverAddDialog
+        <AddDialog
           open={isDialogOpen}
           onOpenChange={(open) => {
             setIsDialogOpen(open);
@@ -327,7 +327,7 @@ export default function DiscoverPage() {
           saveError={saveError}
         />
 
-        <DiscoverEmptyState
+        <EmptyState
           show={
             !isLoading &&
             !isRecommendationMode &&

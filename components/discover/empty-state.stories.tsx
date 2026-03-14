@@ -1,10 +1,10 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 
-import { DiscoverEmptyState } from "./discover-empty-state";
+import { EmptyState } from "./empty-state";
 
-const meta: Meta<typeof DiscoverEmptyState> = {
-  title: "Discover/DiscoverEmptyState",
-  component: DiscoverEmptyState,
+const meta: Meta<typeof EmptyState> = {
+  title: "Discover/EmptyState",
+  component: EmptyState,
   args: {
     show: true,
   },

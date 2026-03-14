@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-import { DiscoverResultsTable } from "./discover-results-table";
+import { ResultsGrid } from "./results-grid";
 import type { SearchResult } from "./types";
 
 const sampleResults: SearchResult[] = [
@@ -57,30 +57,30 @@ const sampleResults: SearchResult[] = [
   },
 ];
 
-const meta: Meta<typeof DiscoverResultsTable> = {
-  title: "Discover/DiscoverResultsTable",
-  component: DiscoverResultsTable,
+const meta: Meta<typeof ResultsGrid> = {
+  title: "Discover/ResultsGrid",
+  component: ResultsGrid,
   args: {
     results: sampleResults,
     currentPage: 1,
-    totalPages: 2,
+    totalPages: 3,
     onPageChange: () => {},
     onAddClick: () => {},
   },
   decorators: [
     (Story) => (
-      <div className="h-[520px] p-6">
+      <div className="p-6">
         <Story />
       </div>
     ),
   ],
   render: (args) => (
-    <DiscoverResultsTable {...args} savedBookIds={new Set(["ol-1"])} />
+    <DiscoverResultsGrid {...args} savedBookIds={new Set(["ol-2"])} />
   ),
 };
 
 export default meta;
 
-type Story = StoryObj<typeof DiscoverResultsTable>;
+type Story = StoryObj<typeof ResultsGrid>;
 
 export const Default: Story = {};

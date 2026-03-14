@@ -8,7 +8,7 @@ import { PaginationSticky } from "@/components/my-library/pagination-sticky";
 
 import type { SearchResult } from "./types";
 
-interface DiscoverResultsTableProps {
+interface ResultsTableProps {
   results: SearchResult[];
   savedBookIds: Set<string>;
   onAddClick: (book: SearchResult) => void;
@@ -17,14 +17,14 @@ interface DiscoverResultsTableProps {
   onPageChange: (page: number) => void;
 }
 
-export function DiscoverResultsTable({
+export function ResultsTable({
   results,
   savedBookIds,
   onAddClick,
   currentPage,
   totalPages,
   onPageChange,
-}: DiscoverResultsTableProps) {
+}: ResultsTableProps) {
   return (
     <div className="max-h-full overflow-auto rounded-lg border [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
       <div className="pb-14">
