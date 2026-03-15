@@ -3,12 +3,17 @@ import { ArrowLeft } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 
-export function BackButton() {
+interface BackButtonProps {
+  title: string;
+  url?: string;
+}
+
+export function BackButton({ title, url }: BackButtonProps) {
   return (
     <Button asChild variant="ghost" size="sm" className="-ml-2">
-      <Link href="/my-library">
+      <Link href={url ?? "/"}>
         <ArrowLeft className="size-4" />
-        Torna alla libreria
+        {title}
       </Link>
     </Button>
   );

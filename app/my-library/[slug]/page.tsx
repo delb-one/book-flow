@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { getLibraryBooks } from "@/lib/library-data";
 import { slugify } from "@/lib/utils";
 
-import { BackButton } from "@/components/my-library/book/back-button";
+import { BackButton } from "@/components/back-button";
 import { BookCover } from "@/components/my-library/book/book-cover";
 import { BookHeader } from "@/components/my-library/book/book-header";
 import { BookMetadata } from "@/components/my-library/book/book-metadata";
@@ -27,7 +27,7 @@ export default async function MyLibraryBookPage({
 
   return (
     <div className="mx-auto w-full space-y-8">
-      <BackButton />
+      <BackButton title="Torna alla libreria" url="/my-library" />
 
       <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
         <div className="space-y-6">

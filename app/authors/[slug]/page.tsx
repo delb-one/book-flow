@@ -7,9 +7,9 @@ import {
 } from "@/lib/open-library-authors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 
-import { BackButton } from "@/components/authors/author/back-button";
 import { Info } from "@/components/authors/author/info";
 import { BooksSection } from "@/components/authors/author/books-section";
+import { BackButton } from "@/components/back-button";
 
 export default async function AuthorDetailsPage({
   params,
@@ -74,7 +74,7 @@ export default async function AuthorDetailsPage({
 
   return (
     <div className="mx-auto w-full space-y-8">
-      <BackButton />
+      <BackButton title="Torna agli autori" url="/authors" />
       <div className="flex flex-col lg:flex-row gap-4">
         <Info
           authorName={authorName}
