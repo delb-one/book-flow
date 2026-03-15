@@ -27,7 +27,7 @@ const allowedTransitions: Record<ReadingStatus, ReadingStatus[]> = {
   unread: ["read", "reading"],
 };
 
-export function MyLibraryBookControls({
+export function BookControls({
   bookId,
   initialStatus,
   initialRating,
