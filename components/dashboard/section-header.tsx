@@ -8,7 +8,7 @@ interface SectionHeaderProps {
   badge?: number;
   action?: ReactNode;
   book?: {
-    status: "unread" | "reading" | "read";
+    status: "unread" | "reading" | "read"| "wishlist";
   };
 }
 

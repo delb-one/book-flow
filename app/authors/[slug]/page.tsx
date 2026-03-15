@@ -28,6 +28,8 @@ import {
   getLibraryAuthorsFromOpenLibrary,
 } from "@/lib/open-library-authors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { SectionHeader } from "@/components/dashboard/section-header";
+import { Badge } from "@/components/ui/badge";
 
 export default async function AuthorDetailsPage({
   params,
@@ -42,6 +44,7 @@ export default async function AuthorDetailsPage({
   ]);
   const authorBooks = books.filter((book) => book.authorSlug === slug);
   const ownedBooks = authorBooks.filter((book) => book.status !== "wishlist");
+
   const wishlistBooks = authorBooks.filter(
     (book) => book.status === "wishlist",
   );
@@ -110,204 +113,221 @@ export default async function AuthorDetailsPage({
         </Button>
       </div>
 
-      <header className="flex flex-col gap-6 rounded-3xl bg-muted/30 p-6 lg:flex-row lg:items-start lg:gap-8">
-        <div className="relative mx-auto size-28 shrink-0 overflow-hidden rounded-full border-4 border-white bg-muted shadow-[0_8px_24px_rgba(15,23,42,0.12)] md:mx-0">
-          <Image
-            src={photoUrl ?? "/images/author-placeholder.svg"}
-            alt={`Ritratto di ${authorName}`}
-            fill
-            className="object-cover"
-            sizes="112px"
-          />
-        </div>
-
-        <div className="flex w-full flex-col gap-6 lg:flex-row lg:items-start lg:justify-between">
-          <div className="space-y-6">
-            {/* Header autore */}
-            <div className="space-y-2">
-              <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                {authorName}
-              </h1>
-
-              <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                {/* Date */}
-                <div className="flex items-center gap-2">
-                  <Calendar className="size-4" />
-                  <span>
-                    {authorDetails?.birth_date
-                      ? formatDate(authorDetails.birth_date)
-                      : "Data di nascita non disponibile"}
-                    {authorDetails?.death_date
-                      ? ` — ${formatDate(authorDetails.death_date)}`
-                      : ""}
-                  </span>
-                </div>
-
-                {/* Luogo */}
-                <div className="flex items-center gap-2">
-                  <MapPin className="size-4" />
-                  <span>
-                    {authorDetails?.birth_place ??
-                      "Luogo di nascita non disponibile"}
-                    {authorDetails?.nationality &&
-                      ` (${authorDetails.nationality})`}
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Bio */}
-            <div className="rounded-xl border bg-muted/30 p-2">
-              <p className="text-sm md:text-base leading-relaxed text-muted-foreground md:max-w-3xl">
-                {bio ?? "Dati biografici non disponibili"}
-              </p>
-            </div>
-
-            {/* Link principali */}
-            <div className="flex flex-wrap gap-3">
-              {wikipediaUrl && (
-                <Link
-                  href={wikipediaUrl}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted transition"
-                >
-                  <Globe className="size-4" />
-                  Wikipedia
-                </Link>
-              )}
-
-              {authorDetails?.website && (
-                <Link
-                  href={authorDetails.website}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted transition"
-                >
-                  <Globe className="size-4" />
-                  Sito ufficiale
-                </Link>
-              )}
-            </div>
-
-            {/* Link aggiuntivi */}
-            {extraLinks.length > 0 && (
+      <div className="flex flex-col gap-4 lg:flex-row">
+        <section className="w-full lg:w-3/5 flex flex-col gap-6 rounded-3xl bg-muted/30 p-6 lg:flex-row lg:items-start lg:gap-8">
+          {" "}
+          <div className="relative mx-auto size-28 shrink-0 overflow-hidden rounded-full border-4 border-white bg-muted shadow-[0_8px_24px_rgba(15,23,42,0.12)] md:mx-0">
+            <Image
+              src={photoUrl ?? "/images/author-placeholder.svg"}
+              alt={`Ritratto di ${authorName}`}
+              fill
+              className="object-cover"
+              sizes="112px"
+            />
+          </div>
+          <div className="flex w-full flex-col gap-6 lg:items-start lg:justify-between">
+            <div className="space-y-6">
+              {/* section autore */}
               <div className="space-y-2">
-                <h4 className="text-sm font-medium text-muted-foreground">
-                  Altri collegamenti
-                </h4>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
+                  {authorName}
+                </h1>
 
-                <div className="flex flex-wrap gap-2">
-                  {extraLinks.map((link) => (
-                    <Link
-                      key={link.url}
-                      href={link.url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition"
-                    >
-                      {link.title ?? link.url}
-                    </Link>
-                  ))}
+                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+                  {/* Date */}
+                  <div className="flex items-center gap-2">
+                    <Calendar className="size-4" />
+                    <span>
+                      {authorDetails?.birth_date
+                        ? formatDate(authorDetails.birth_date)
+                        : "Data di nascita non disponibile"}
+                      {authorDetails?.death_date
+                        ? ` — ${formatDate(authorDetails.death_date)}`
+                        : ""}
+                    </span>
+                  </div>
+
+                  {/* Luogo */}
+                  <div className="flex items-center gap-2">
+                    <MapPin className="size-4" />
+                    <span>
+                      {authorDetails?.birth_place ??
+                        "Luogo di nascita non disponibile"}
+                      {authorDetails?.nationality &&
+                        ` (${authorDetails.nationality})`}
+                    </span>
+                  </div>
                 </div>
               </div>
-            )}
-          </div>
 
-          <div className="flex flex-col gap-6 lg:min-w-72">
-            {" "}
-            <Card>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <CardDescription className="text-sm">
-                      {primaryLabel}
-                    </CardDescription>
-                    <CardTitle className="font-bold text-2xl">
-                      {primaryCount}
-                    </CardTitle>
+              {/* Bio */}
+              <div className="rounded-xl border bg-muted/30 p-2">
+                <p className="text-sm md:text-base leading-relaxed text-muted-foreground md:max-w-3xl">
+                  {bio ?? "Dati biografici non disponibili"}
+                </p>
+              </div>
+
+              {/* Link principali */}
+              <div className="flex flex-wrap gap-3">
+                {wikipediaUrl && (
+                  <Link
+                    href={wikipediaUrl}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted transition"
+                  >
+                    <Globe className="size-4" />
+                    Wikipedia
+                  </Link>
+                )}
+
+                {authorDetails?.website && (
+                  <Link
+                    href={authorDetails.website}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted transition"
+                  >
+                    <Globe className="size-4" />
+                    Sito ufficiale
+                  </Link>
+                )}
+              </div>
+
+              {/* Link aggiuntivi */}
+              {extraLinks.length > 0 && (
+                <div className="space-y-2">
+                  <h4 className="text-sm font-medium text-muted-foreground">
+                    Altri collegamenti
+                  </h4>
+
+                  <div className="flex flex-wrap gap-2">
+                    {extraLinks.map((link) => (
+                      <Link
+                        key={link.url}
+                        href={link.url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition"
+                      >
+                        {link.title ?? link.url}
+                      </Link>
+                    ))}
                   </div>
-                  <PrimaryIcon className="size-5 text-primary" aria-hidden />
                 </div>
-              </CardHeader>
-            </Card>
-            <Card>
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <CardDescription className="text-sm">
-                      Libri letti
-                    </CardDescription>
-                    <CardTitle className="font-bold text-2xl">
-                      {booksRead}
-                    </CardTitle>
+              )}
+            </div>
+            <div className="flex flex-row gap-2 w-full justify-between">
+              <Card className="flex-1">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <CardDescription className="text-sm">
+                        {primaryLabel}
+                      </CardDescription>
+                      <CardTitle className="font-bold text-2xl">
+                        {primaryCount}
+                      </CardTitle>
+                    </div>
+                    <PrimaryIcon className="size-5 text-primary" aria-hidden />
                   </div>
-                  <BookCheck className="size-5 text-primary" aria-hidden />
-                </div>
-              </CardHeader>
-            </Card>
-            <Card className="lg:col-span-2">
-              <CardHeader>
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <CardDescription className="text-sm">
-                      Media Voti
-                    </CardDescription>
-                    <CardTitle className="font-bold text-2xl">
-                      {averageRating ? averageRating.toFixed(1) : "n/a"}{" "}
-                    </CardTitle>
+                </CardHeader>
+              </Card>
+              <Card className="flex-1">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <CardDescription className="text-sm">
+                        Libri letti
+                      </CardDescription>
+                      <CardTitle className="font-bold text-2xl">
+                        {booksRead}
+                      </CardTitle>
+                    </div>
+                    <BookCheck className="size-5 text-primary" aria-hidden />
                   </div>
-                  <Star className="size-5 text-primary" aria-hidden />
-                </div>
-              </CardHeader>
-            </Card>
+                </CardHeader>
+              </Card>
+              <Card className="flex-1">
+                <CardHeader>
+                  <div className="flex items-start justify-between gap-4">
+                    <div>
+                      <CardDescription className="text-sm">
+                        Media Voti
+                      </CardDescription>
+                      <CardTitle className="font-bold text-2xl">
+                        {averageRating ? averageRating.toFixed(1) : "n/a"}{" "}
+                      </CardTitle>
+                    </div>
+                    <Star className="size-5 text-primary" aria-hidden />
+                  </div>
+                </CardHeader>
+              </Card>
+            </div>
+            <div className="grid grid-cols-2 gap-6 lg:min-w-72"> </div>
           </div>
+        </section>
+
+        <div className="w-full lg:w-2/5 flex lg:flex-row min-w-0 gap-4">
+          {" "}
+          {ownedBooks.length > 0 && (
+            <section className="space-y-4 flex-1">
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 ">
+                <div className="min-w-0 space-y-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <h1 className="leading-none font-bold">Libri posseduti</h1>
+
+                    <Badge variant="default">{totalOwnedBooks}</Badge>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4 overflow-x-auto pb-2">
+                {" "}
+                {ownedBooks.map((book) => (
+                  <div key={book.id} className="shrink-0">
+                    <BookSmallCard
+                      key={book.id}
+                      book={{
+                        title: book.title,
+                        author: book.author,
+                        cover: book.cover,
+                        status: book.status,
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
+          {wishlistBooks.length > 0 && (
+            <section className="space-y-4 flex-1">
+              <SectionHeader
+                title="Da comprare"
+                badge={totalWishlistBooks}
+                book={{ status: "wishlist" }}
+              />
+
+              <div className="flex gap-4 overflow-x-auto pb-2">
+                {" "}
+                {wishlistBooks.map((book) => (
+                  <div key={book.id} className="shrink-0">
+                    <BookSmallCard
+                      key={book.id}
+                      book={{
+                        title: book.title,
+                        author: book.author,
+                        cover: book.cover,
+                        status: book.status,
+                      }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
         </div>
-      </header>
-
-      {ownedBooks.length > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Libri posseduti</h2>
-          </div>
-
-          <div className="flex flex-wrap gap-4">
-            {ownedBooks.map((book) => (
-              <BookSmallCard
-                key={book.id}
-                book={{
-                  title: book.title,
-                  author: book.author,
-                  cover: book.cover,
-                  status: book.status,
-                }}
-              />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {wishlistBooks.length > 0 && (
-        <section className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold">Da comprare</h2>
-          </div>
-
-          <div className="flex flex-wrap gap-4">
-            {wishlistBooks.map((book) => (
-              <BookSmallCard
-                key={book.id}
-                book={{
-                  title: book.title,
-                  author: book.author,
-                  cover: book.cover,
-                  status: book.status,
-                }}
-              />
-            ))}
-          </div>
-        </section>
-      )}
+      </div>
     </div>
   );
 }
