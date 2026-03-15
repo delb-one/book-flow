@@ -58,7 +58,7 @@ const sampleResults: SearchResult[] = [
 ];
 
 const meta: Meta<typeof ResultsTable> = {
-  title: "Discover/ResultsTable",
+  title: "Components/Discover/ResultsTable",
   component: ResultsTable,
   args: {
     results: sampleResults,

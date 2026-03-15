@@ -2,7 +2,7 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { SearchCard } from "./search-card";
 
 const meta: Meta<typeof SearchCard> = {
-  title: "Discover/SearchCard",
+  title: "Components/Discover/SearchCard",
   component: SearchCard,
   args: {
     query: "",

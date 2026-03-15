@@ -18,7 +18,7 @@ const sampleBook: SearchResult = {
 };
 
 const meta: Meta<typeof AddDialog> = {
-  title: "Discover/AddDialog",
+  title: "Components/Discover/AddDialog",
   component: AddDialog,
   args: {
     open: true,

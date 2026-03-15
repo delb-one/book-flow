@@ -58,7 +58,7 @@ const sampleResults: SearchResult[] = [
 ];
 
 const meta: Meta<typeof ResultsGrid> = {
-  title: "Discover/ResultsGrid",
+  title: "Components/Discover/ResultsGrid",
   component: ResultsGrid,
   args: {
     results: sampleResults,
