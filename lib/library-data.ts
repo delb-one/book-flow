@@ -86,7 +86,7 @@ async function fetchLibraryBooks(): Promise<LibraryBook[]> {
     throw new Error(`library_books joined query failed: ${error.message}`);
   }
 
-  const rows = (data ?? []) as LibraryJoinedRow[];
+  const rows = (data ?? []) as unknown as LibraryJoinedRow[];
   if (rows.length === 0) return [];
 
   return rows

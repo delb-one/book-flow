@@ -94,7 +94,7 @@ async function fetchLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> {
     throw new Error(`library_books authors query failed: ${error.message}`);
   }
 
-  const rows = (data ?? []) as LibraryAuthorRow[];
+  const rows = (data ?? []) as unknown as LibraryAuthorRow[];
   if (rows.length === 0) return [];
 
   const map = new Map<string, AuthorAggregate>();

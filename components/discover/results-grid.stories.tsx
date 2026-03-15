@@ -75,7 +75,7 @@ const meta: Meta<typeof ResultsGrid> = {
     ),
   ],
   render: (args) => (
-    <DiscoverResultsGrid {...args} savedBookIds={new Set(["ol-2"])} />
+    <ResultsGrid {...args} savedBookIds={new Set(["ol-2"])} />
   ),
 };
 

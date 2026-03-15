@@ -1,35 +1,16 @@
-import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
-import {
-  ArrowLeft,
-  Book,
-  BookCheck,
-  Bookmark,
-  Calendar,
-  Check,
-  Globe,
-  MapPin,
-  Star,
-} from "lucide-react";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { BookSmallCard } from "@/components/dashboard/book-small-card";
 import { getLibraryBooks } from "@/lib/library-data";
 import {
   getAuthorDetailsBySlug,
   getLibraryAuthorsFromOpenLibrary,
 } from "@/lib/open-library-authors";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { SectionHeader } from "@/components/dashboard/section-header";
-import { Badge } from "@/components/ui/badge";
+
+import { BackButton } from "@/components/authors/author/back-button";
+import { Info } from "@/components/authors/author/info";
+import { Stats } from "@/components/authors/author/stats";
+import { BooksSection } from "@/components/authors/author/books-section";
 
 export default async function AuthorDetailsPage({
   params,
@@ -44,7 +25,6 @@ export default async function AuthorDetailsPage({
   ]);
   const authorBooks = books.filter((book) => book.authorSlug === slug);
   const ownedBooks = authorBooks.filter((book) => book.status !== "wishlist");
-
   const wishlistBooks = authorBooks.filter(
     (book) => book.status === "wishlist",
   );
@@ -57,11 +37,6 @@ export default async function AuthorDetailsPage({
   const authorInfo = authors.find((author) => author.slug === slug) ?? null;
   const totalOwnedBooks = ownedBooks.length;
   const totalWishlistBooks = wishlistBooks.length;
-  const primaryCount =
-    totalOwnedBooks > 0 ? totalOwnedBooks : totalWishlistBooks;
-  const primaryLabel =
-    totalOwnedBooks > 0 ? "Libri posseduti" : "Libri da comprare";
-  const PrimaryIcon = totalOwnedBooks > 0 ? Book : Bookmark;
   const booksRead = authorBooks.filter((book) => book.status === "read").length;
   const ratings = authorBooks
     .map((book) => book.rating)
@@ -96,237 +71,53 @@ export default async function AuthorDetailsPage({
 
   const formattedBirthDate = formatDate(authorDetails?.birth_date ?? null);
   const formattedDeathDate = formatDate(authorDetails?.death_date ?? null);
-  const lifeSpan =
-    formattedBirthDate || formattedDeathDate
-      ? [formattedBirthDate ?? "?", formattedDeathDate ?? "—"].join(" – ")
-      : null;
   const extraLinks = normalizeLinks(authorDetails?.links);
 
   return (
     <div className="mx-auto w-full space-y-8">
-      <div>
-        <Button asChild variant="ghost" size="sm" className="-ml-2">
-          <Link href="/authors">
-            <ArrowLeft className="size-4" />
-            Torna agli autori
-          </Link>
-        </Button>
-      </div>
+      <BackButton />
 
       <div className="flex flex-col gap-4 lg:flex-row">
-        <section className="w-full lg:w-3/5 flex flex-col gap-6 rounded-3xl bg-muted/30 p-6 lg:flex-row lg:items-start lg:gap-8">
-          {" "}
-          <div className="relative mx-auto size-28 shrink-0 overflow-hidden rounded-full border-4 border-white bg-muted shadow-[0_8px_24px_rgba(15,23,42,0.12)] md:mx-0">
-            <Image
-              src={photoUrl ?? "/images/author-placeholder.svg"}
-              alt={`Ritratto di ${authorName}`}
-              fill
-              className="object-cover"
-              sizes="112px"
-            />
-          </div>
-          <div className="flex w-full flex-col gap-6 lg:items-start lg:justify-between">
-            <div className="space-y-6">
-              {/* section autore */}
-              <div className="space-y-2">
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight">
-                  {authorName}
-                </h1>
-
-                <div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
-                  {/* Date */}
-                  <div className="flex items-center gap-2">
-                    <Calendar className="size-4" />
-                    <span>
-                      {authorDetails?.birth_date
-                        ? formatDate(authorDetails.birth_date)
-                        : "Data di nascita non disponibile"}
-                      {authorDetails?.death_date
-                        ? ` — ${formatDate(authorDetails.death_date)}`
-                        : ""}
-                    </span>
-                  </div>
-
-                  {/* Luogo */}
-                  <div className="flex items-center gap-2">
-                    <MapPin className="size-4" />
-                    <span>
-                      {authorDetails?.birth_place ??
-                        "Luogo di nascita non disponibile"}
-                      {authorDetails?.nationality &&
-                        ` (${authorDetails.nationality})`}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Bio */}
-              <div className="rounded-xl border bg-muted/30 p-2">
-                <p className="text-sm md:text-base leading-relaxed text-muted-foreground md:max-w-3xl">
-                  {bio ?? "Dati biografici non disponibili"}
-                </p>
-              </div>
-
-              {/* Link principali */}
-              <div className="flex flex-wrap gap-3">
-                {wikipediaUrl && (
-                  <Link
-                    href={wikipediaUrl}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted transition"
-                  >
-                    <Globe className="size-4" />
-                    Wikipedia
-                  </Link>
-                )}
-
-                {authorDetails?.website && (
-                  <Link
-                    href={authorDetails.website}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:bg-muted transition"
-                  >
-                    <Globe className="size-4" />
-                    Sito ufficiale
-                  </Link>
-                )}
-              </div>
-
-              {/* Link aggiuntivi */}
-              {extraLinks.length > 0 && (
-                <div className="space-y-2">
-                  <h4 className="text-sm font-medium text-muted-foreground">
-                    Altri collegamenti
-                  </h4>
-
-                  <div className="flex flex-wrap gap-2">
-                    {extraLinks.map((link) => (
-                      <Link
-                        key={link.url}
-                        href={link.url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs text-muted-foreground hover:text-foreground hover:bg-muted transition"
-                      >
-                        {link.title ?? link.url}
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-            <div className="flex flex-row gap-2 w-full justify-between">
-              <Card className="flex-1">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <CardDescription className="text-sm">
-                        {primaryLabel}
-                      </CardDescription>
-                      <CardTitle className="font-bold text-2xl">
-                        {primaryCount}
-                      </CardTitle>
-                    </div>
-                    <PrimaryIcon className="size-5 text-primary" aria-hidden />
-                  </div>
-                </CardHeader>
-              </Card>
-              <Card className="flex-1">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <CardDescription className="text-sm">
-                        Libri letti
-                      </CardDescription>
-                      <CardTitle className="font-bold text-2xl">
-                        {booksRead}
-                      </CardTitle>
-                    </div>
-                    <BookCheck className="size-5 text-primary" aria-hidden />
-                  </div>
-                </CardHeader>
-              </Card>
-              <Card className="flex-1">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div>
-                      <CardDescription className="text-sm">
-                        Media Voti
-                      </CardDescription>
-                      <CardTitle className="font-bold text-2xl">
-                        {averageRating ? averageRating.toFixed(1) : "n/a"}{" "}
-                      </CardTitle>
-                    </div>
-                    <Star className="size-5 text-primary" aria-hidden />
-                  </div>
-                </CardHeader>
-              </Card>
-            </div>
-            <div className="grid grid-cols-2 gap-6 lg:min-w-72"> </div>
-          </div>
-        </section>
+        <Info
+          authorName={authorName}
+          photoUrl={photoUrl}
+          birthDate={formattedBirthDate}
+          deathDate={formattedDeathDate}
+          birthPlace={authorDetails?.birth_place ?? null}
+          nationality={authorDetails?.nationality ?? null}
+          bio={bio}
+          wikipediaUrl={wikipediaUrl}
+          website={authorDetails?.website ?? null}
+          extraLinks={extraLinks}
+        />
 
         <div className="w-full lg:w-2/5 flex lg:flex-row min-w-0 gap-4">
-          {" "}
-          {ownedBooks.length > 0 && (
-            <section className="space-y-4 flex-1">
-              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4 ">
-                <div className="min-w-0 space-y-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="leading-none font-bold">Libri posseduti</h1>
-
-                    <Badge variant="default">{totalOwnedBooks}</Badge>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {" "}
-                {ownedBooks.map((book) => (
-                  <div key={book.id} className="shrink-0">
-                    <BookSmallCard
-                      key={book.id}
-                      book={{
-                        title: book.title,
-                        author: book.author,
-                        cover: book.cover,
-                        status: book.status,
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
-          {wishlistBooks.length > 0 && (
-            <section className="space-y-4 flex-1">
-              <SectionHeader
-                title="Da comprare"
-                badge={totalWishlistBooks}
-                book={{ status: "wishlist" }}
-              />
-
-              <div className="flex gap-4 overflow-x-auto pb-2">
-                {" "}
-                {wishlistBooks.map((book) => (
-                  <div key={book.id} className="shrink-0">
-                    <BookSmallCard
-                      key={book.id}
-                      book={{
-                        title: book.title,
-                        author: book.author,
-                        cover: book.cover,
-                        status: book.status,
-                      }}
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
-          )}
+          <Stats
+            totalOwnedBooks={totalOwnedBooks}
+            totalWishlistBooks={totalWishlistBooks}
+            booksRead={booksRead}
+            averageRating={averageRating}
+          />
         </div>
+      </div>
+
+      <div className="w-full lg:w-2/5 flex lg:flex-row min-w-0 gap-4">
+        {ownedBooks.length > 0 && (
+          <BooksSection
+            title="Libri posseduti"
+            books={ownedBooks}
+            badge={totalOwnedBooks}
+            variant="owned"
+          />
+        )}
+        {wishlistBooks.length > 0 && (
+          <BooksSection
+            title="Da comprare"
+            books={wishlistBooks}
+            badge={totalWishlistBooks}
+            variant="wishlist"
+          />
+        )}
       </div>
     </div>
   );
@@ -422,19 +213,19 @@ function formatDate(value: string | null) {
 
 function normalizeLinks(value: unknown): { title?: string; url: string }[] {
   if (!Array.isArray(value)) return [];
-  return value
-    .map((item) => {
-      if (!item || typeof item !== "object") return null;
-      const url =
-        typeof (item as { url?: unknown }).url === "string"
-          ? ((item as { url?: string }).url ?? "").trim()
-          : "";
-      if (!url) return null;
-      const title =
-        typeof (item as { title?: unknown }).title === "string"
-          ? ((item as { title?: string }).title ?? "").trim()
-          : undefined;
-      return { url, title: title || undefined };
-    })
-    .filter((item): item is { title?: string; url: string } => Boolean(item));
+  const result: { title?: string; url: string }[] = [];
+  for (const item of value) {
+    if (!item || typeof item !== "object") continue;
+    const url =
+      typeof (item as { url?: unknown }).url === "string"
+        ? ((item as { url?: string }).url ?? "").trim()
+        : "";
+    if (!url) continue;
+    const title =
+      typeof (item as { title?: unknown }).title === "string"
+        ? ((item as { title?: string }).title ?? "").trim()
+        : undefined;
+    result.push({ url, title: title || undefined });
+  }
+  return result;
 }

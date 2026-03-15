@@ -96,7 +96,7 @@ export async function POST(request: NextRequest) {
       authorId = createdAuthor.id as string;
       // Treat the freshly created author as existing for metadata enrichment.
       existingAuthor = createdAuthor as typeof existingAuthor;
-    } else if (!existingAuthor.openlibrary_key && payload.authorKey) {
+    } else if (!existingAuthor?.openlibrary_key && payload.authorKey) {
       const { error: authorUpdateError } = await supabase
         .from("authors")
         .update({ openlibrary_key: payload.authorKey })
@@ -199,7 +199,7 @@ export async function POST(request: NextRequest) {
 
     if (authorId && Object.keys(authorUpdates).length > 0) {
       await supabase.from("authors").update(authorUpdates).eq("id", authorId);
-      revalidateTag("library-authors");
+      revalidateTag("library-authors", "max");
     }
 
     const { error: bookUpsertError } = await supabase.from("books").upsert(
@@ -352,7 +352,7 @@ async function getOpenLibraryAuthor(
         ?.map((link) =>
           link.url ? { title: link.title, url: link.url } : null,
         )
-        .filter((link): link is { title?: string; url: string } =>
+        .filter((link): link is { title: string | undefined; url: string } =>
           Boolean(link?.url),
         ) ?? null;
 
