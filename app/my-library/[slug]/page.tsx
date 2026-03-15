@@ -63,56 +63,32 @@ export default async function MyLibraryBookPage({
           </Card>
 
           <Card>
-            {/* <CardHeader className="pb-3">
-              <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
-                Preferenze lettura
-              </p>
-            </CardHeader> */}
             <CardContent className="space-y-4 p-4">
               <MyLibraryBookControls
                 bookId={book.id}
                 initialStatus={book.status}
                 initialRating={book.rating}
               />
-
-              {/* <div className="grid grid-cols-2 gap-4 border-t pt-4 text-sm">
-                <div>
-                  <p className="text-muted-foreground text-xs font-semibold uppercase">
-                    Inizio
-                  </p>
-                  <p className="font-medium">{book.addedAt || "-"}</p>
-                </div>
-                <div>
-                  <p className="text-muted-foreground text-xs font-semibold uppercase">
-                    Fine
-                  </p>
-                  <p className="font-medium">
-                    {book.status === "read" ? "Completato" : "-"}
-                  </p>
-                </div>
-              </div> */}
-
-              {/* <div className="flex items-center gap-2 text-sm">
-                <BookOpen className="size-4 text-muted-foreground" />
-                <span>Scaffale: Main Bookshelf</span>
-              </div> */}
             </CardContent>
           </Card>
         </div>
 
         <div className="space-y-6">
           <header className="space-y-2">
-            <Link href={`/authors/${book.authorSlug}`}>
-              <p className="text-muted-foreground text-sm">
-                di{" "}
-                <span className="font-semibold text-foreground">
-                  {book.author}
-                </span>
-              </p>
-            </Link>
             <h1 className="text-3xl font-semibold tracking-tight">
               {book.title}
             </h1>
+
+            <p className="text-muted-foreground text-sm">
+              di
+              <Button asChild variant="link" className="pl-1 h-auto">
+                <Link href={`/authors/${book.authorSlug}`}>
+                  <span className="font-semibold text-foreground">
+                    {book.author}
+                  </span>
+                </Link>
+              </Button>
+            </p>
             <div className="flex flex-wrap gap-2">
               {book.categories.map((category) => (
                 <Badge key={category} variant="outline">
@@ -122,40 +98,40 @@ export default async function MyLibraryBookPage({
             </div>
           </header>
 
-          <Card>
+            <Card>
             <CardContent className="grid gap-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="space-y-1">
-                <p className="text-muted-foreground text-xs font-semibold uppercase">
-                  Editore
-                </p>
-                <p className="text-sm font-medium">{book.publisher || "-"}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-muted-foreground text-xs font-semibold uppercase">
-                  Anno
-                </p>
-                <p className="text-sm font-medium">{book.year || "-"}</p>
-              </div>
-              <div className="space-y-1">
-                <p className="text-muted-foreground text-xs font-semibold uppercase">
-                  Pagine
-                </p>
-                <p className="text-sm font-medium">
-                  {book.pages ? `${book.pages} pagine` : "-"}
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+                <div className="space-y-1">
+                  <p className="text-muted-foreground text-xs font-semibold uppercase">
+                    Editore
+                  </p>
+                  <p className="text-sm font-medium">{book.publisher || "-"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-muted-foreground text-xs font-semibold uppercase">
+                    Anno
+                  </p>
+                  <p className="text-sm font-medium">{book.year || "-"}</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-muted-foreground text-xs font-semibold uppercase">
+                    Pagine
+                  </p>
+                  <p className="text-sm font-medium">
+                    {book.pages ? `${book.pages}` : "-"}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
 
-          <Card>
-            <CardHeader className="flex flex-row items-center gap-2 pb-2">
-              <BookText className="size-5 text-primary" />
-              <p className="text-base font-semibold">Sinossi</p>
-            </CardHeader>
-            <CardContent className="text-muted-foreground text-sm leading-relaxed p-4">
-              {book.description || "Nessuna descrizione disponibile."}
-            </CardContent>
-          </Card>
+            <Card>
+              <CardHeader className="flex flex-row items-center gap-2 pb-2">
+                <BookText className="size-5 text-primary" />
+                <p className="text-base font-semibold">Trama</p>
+              </CardHeader>
+              <CardContent className="text-muted-foreground text-sm leading-relaxed p-4">
+                {book.description || "Nessuna descrizione disponibile."}
+              </CardContent>
+            </Card>
 
           <Card className="bg-muted/40">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -171,35 +147,6 @@ export default async function MyLibraryBookPage({
               />
             </CardContent>
           </Card>
-
-          {/* <Card>
-            <CardHeader className="flex flex-row items-center justify-between pb-2">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="size-4 text-muted-foreground" />
-                <p className="text-base font-semibold">Progresso lettura</p>
-              </div>
-              <Badge variant="secondary">{book.progress}%</Badge>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <Progress value={book.progress} />
-              <div className="grid gap-3 text-xs text-muted-foreground sm:grid-cols-3">
-                <div>
-                  <p className="font-semibold text-foreground">Inizio</p>
-                  <p>{book.addedAt || "-"}</p>
-                </div>
-                <div className="sm:text-center">
-                  <p className="font-semibold text-foreground">
-                    Pagina {Math.max(1, Math.round((book.progress / 100) * book.pages))}
-                  </p>
-                  <p>Ultimo aggiornamento</p>
-                </div>
-                <div className="sm:text-right">
-                  <p className="font-semibold text-foreground">Obiettivo</p>
-                  <p>-</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card> */}
         </div>
       </div>
     </div>
