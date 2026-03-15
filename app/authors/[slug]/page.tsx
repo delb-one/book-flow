@@ -9,7 +9,6 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 
 import { BackButton } from "@/components/authors/author/back-button";
 import { Info } from "@/components/authors/author/info";
-import { Stats } from "@/components/authors/author/stats";
 import { BooksSection } from "@/components/authors/author/books-section";
 
 export default async function AuthorDetailsPage({
@@ -76,8 +75,7 @@ export default async function AuthorDetailsPage({
   return (
     <div className="mx-auto w-full space-y-8">
       <BackButton />
-
-      <div className="flex flex-col gap-4 lg:flex-row">
+      <div className="flex flex-col lg:flex-row gap-4">
         <Info
           authorName={authorName}
           photoUrl={photoUrl}
@@ -89,35 +87,29 @@ export default async function AuthorDetailsPage({
           wikipediaUrl={wikipediaUrl}
           website={authorDetails?.website ?? null}
           extraLinks={extraLinks}
+          totalOwnedBooks={totalOwnedBooks}
+          totalWishlistBooks={totalWishlistBooks}
+          booksRead={booksRead}
+          averageRating={averageRating}
         />
-
-        <div className="w-full lg:w-2/5 flex lg:flex-row min-w-0 gap-4">
-          <Stats
-            totalOwnedBooks={totalOwnedBooks}
-            totalWishlistBooks={totalWishlistBooks}
-            booksRead={booksRead}
-            averageRating={averageRating}
-          />
+        <div className="w-full lg:w-2/5 flex lg:flex-row min-w-0 gap-4 ">
+          {ownedBooks.length > 0 && (
+            <BooksSection
+              title="Libri posseduti"
+              books={ownedBooks}
+              badge={totalOwnedBooks}
+              variant="owned"
+            />
+          )}
+          {wishlistBooks.length > 0 && (
+            <BooksSection
+              title="Da comprare"
+              books={wishlistBooks}
+              badge={totalWishlistBooks}
+              variant="wishlist"
+            />
+          )}
         </div>
-      </div>
-
-      <div className="w-full lg:w-2/5 flex lg:flex-row min-w-0 gap-4">
-        {ownedBooks.length > 0 && (
-          <BooksSection
-            title="Libri posseduti"
-            books={ownedBooks}
-            badge={totalOwnedBooks}
-            variant="owned"
-          />
-        )}
-        {wishlistBooks.length > 0 && (
-          <BooksSection
-            title="Da comprare"
-            books={wishlistBooks}
-            badge={totalWishlistBooks}
-            variant="wishlist"
-          />
-        )}
       </div>
     </div>
   );

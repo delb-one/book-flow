@@ -1,7 +1,8 @@
 import Image from "next/image";
-import { Calendar, MapPin, Globe } from "lucide-react";
+import { Calendar, MapPin } from "lucide-react";
 
 import { Links } from "@/components/authors/author/links";
+import { Stats } from "./stats";
 
 type InfoProps = {
   authorName: string;
@@ -14,6 +15,10 @@ type InfoProps = {
   wikipediaUrl: string | null;
   website: string | null;
   extraLinks: Array<{ title?: string; url: string }>;
+  totalOwnedBooks: number;
+  totalWishlistBooks: number;
+  booksRead: number;
+  averageRating: number | null;
 };
 
 export function Info({
@@ -27,6 +32,10 @@ export function Info({
   wikipediaUrl,
   website,
   extraLinks,
+  totalOwnedBooks,
+  totalWishlistBooks,
+  booksRead,
+  averageRating,
 }: InfoProps) {
   return (
     <section className="w-full lg:w-3/5 flex flex-col gap-6 rounded-3xl bg-muted/30 p-6 lg:flex-row lg:items-start lg:gap-8">
@@ -76,6 +85,12 @@ export function Info({
             wikipediaUrl={wikipediaUrl}
             website={website}
             extraLinks={extraLinks}
+          />
+          <Stats
+            totalOwnedBooks={totalOwnedBooks}
+            totalWishlistBooks={totalWishlistBooks}
+            booksRead={booksRead}
+            averageRating={averageRating}
           />
         </div>
       </div>
