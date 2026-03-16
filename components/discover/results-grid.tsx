@@ -17,6 +17,7 @@ interface ResultsGridProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  onDetailsClick: (book: SearchResult) => void;
 }
 
 export function ResultsGrid({
@@ -26,6 +27,7 @@ export function ResultsGrid({
   currentPage,
   totalPages,
   onPageChange,
+  onDetailsClick,
 }: ResultsGridProps) {
   return (
     <>
@@ -38,7 +40,10 @@ export function ResultsGrid({
               <Card key={book.id}>
                 <CardHeader>
                   <div className="mb-2 flex gap-3">
-                    <div className="bg-muted relative h-16 w-12 overflow-hidden rounded-md group cursor-pointer">
+                    <div
+                      className="bg-muted relative h-16 w-12 overflow-hidden rounded-md group cursor-pointer"
+                      onClick={() => onDetailsClick(book)}
+                    >
                       {book.cover ? (
                         <Image
                           src={book.cover}

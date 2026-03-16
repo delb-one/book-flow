@@ -7,15 +7,10 @@ const meta: Meta<typeof SearchCard> = {
   args: {
     query: "",
     onQueryChange: () => {},
-    onRecommend: () => {},
+    handleRecommend: () => {},
     isLoading: false,
-    isRecommending: false,
     searchError: null,
-    recommendationError: null,
-    recommendationReason: null,
     resultsCount: 18,
-    viewMode: "grid",
-    onViewModeChange: () => {},
   },
   decorators: [
     (Story) => (
@@ -41,13 +36,5 @@ export const Loading: Story = {
 export const ErrorState: Story = {
   args: {
     searchError: "Errore durante la ricerca.",
-  },
-};
-
-export const Recommendation: Story = {
-  args: {
-    isRecommending: true,
-    recommendationReason: "Consiglio basato su: fantasy",
-    resultsCount: 1,
   },
 };

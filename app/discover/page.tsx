@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { AddDialog } from "@/components/discover/add-dialog";
+import { BookDetailsModal } from "@/components/discover/book-details-modal";
 import { EmptyState } from "@/components/discover/empty-state";
 import { RecommendationCard } from "@/components/discover/recommendation-card";
 import { ResultsGrid } from "@/components/discover/results-grid";
@@ -51,6 +52,7 @@ export default function DiscoverPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [savedBookIds, setSavedBookIds] = useState<Set<string>>(new Set());
+  const [detailsBookId, setDetailsBookId] = useState<string | null>(null);
 
   // ── Debounce query ──
   useEffect(() => {
@@ -156,6 +158,15 @@ export default function DiscoverPage() {
       (recommendation?.id === selectedBookId ? recommendation : null)
     );
   }, [searchResults, selectedBookId, recommendation]);
+
+  // ── Details book (for modal) ──
+  const detailsBook = useMemo(() => {
+    if (!detailsBookId) return null;
+    return (
+      searchResults.find((r) => r.id === detailsBookId) ??
+      (recommendation?.id === detailsBookId ? recommendation : null)
+    );
+  }, [searchResults, detailsBookId, recommendation]);
 
   // ── Recommendation fetch ──
   async function handleRecommend() {
@@ -263,6 +274,10 @@ export default function DiscoverPage() {
     setIsDialogOpen(true);
   }
 
+  function openDetailsModal(book: SearchResult) {
+    setDetailsBookId(book.id);
+  }
+
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex flex-1 min-h-0 flex-col gap-6">
@@ -333,6 +348,7 @@ export default function DiscoverPage() {
               totalPages={gridTotalPages}
               onPageChange={setGridPage}
               onAddClick={openAddDialog}
+              onDetailsClick={openDetailsModal}
             />
           )}
 
@@ -344,6 +360,7 @@ export default function DiscoverPage() {
               totalPages={tableTotalPages}
               onPageChange={setTablePage}
               onAddClick={openAddDialog}
+              onDetailsClick={openDetailsModal}
             />
           )}
         </div>
@@ -367,6 +384,16 @@ export default function DiscoverPage() {
           onConfirm={handleAddBook}
           isSaving={isSaving}
           saveError={saveError}
+        />
+
+        <BookDetailsModal
+          book={detailsBook}
+          open={!!detailsBookId}
+          onOpenChange={(open) => {
+            if (!open) {
+              setDetailsBookId(null);
+            }
+          }}
         />
 
         <EmptyState

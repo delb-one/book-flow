@@ -16,6 +16,7 @@ interface ResultsTableProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  onDetailsClick: (book: SearchResult) => void;
 }
 
 export function ResultsTable({
@@ -25,6 +26,7 @@ export function ResultsTable({
   currentPage,
   totalPages,
   onPageChange,
+  onDetailsClick,
 }: ResultsTableProps) {
   return (
     <div className="max-h-full overflow-auto rounded-lg border [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
@@ -48,7 +50,10 @@ export function ResultsTable({
               return (
                 <tr key={book.id} className="border-t">
                   <td className="px-3 py-2">
-                    <div className="bg-muted relative h-16 w-12 overflow-hidden rounded-md group cursor-pointer">
+                    <div
+                      className="bg-muted relative h-16 w-12 overflow-hidden rounded-md group cursor-pointer"
+                      onClick={() => onDetailsClick(book)}
+                    >
                       {book.cover ? (
                         <Image
                           src={book.cover}
@@ -57,7 +62,6 @@ export function ResultsTable({
                           width={48}
                           height={64}
                           unoptimized
-                          
                         />
                       ) : (
                         <div className="text-muted-foreground flex h-full items-center justify-center text-[10px]">
