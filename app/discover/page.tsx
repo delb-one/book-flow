@@ -288,7 +288,6 @@ export default function DiscoverPage() {
             isLoading={isLoading}
             searchError={searchError}
             resultsCount={searchResults.length}
-            // handleRecommend={handleRecommend}
           />
 
           {/* Recommendation panel */}

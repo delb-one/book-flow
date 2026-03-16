@@ -37,7 +37,7 @@ export function ResultsGrid({
             const isSaved = savedBookIds.has(book.id);
 
             return (
-              <Card key={book.id}>
+              <Card key={book.id} className="flex justify-between">
                 <CardHeader>
                   <div className="mb-2 flex gap-3">
                     <div
