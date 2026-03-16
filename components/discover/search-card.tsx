@@ -1,6 +1,6 @@
 "use client";
 
-import { Grid3X3, List, Loader2, Search } from "lucide-react";
+import { Loader2, RotateCcw, Search } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -11,41 +11,50 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-
-import type { ViewMode } from "./types";
+import { Tooltip, TooltipTrigger } from "@radix-ui/react-tooltip";
+import { TooltipContent } from "../ui/tooltip";
 
 interface SearchCardProps {
   query: string;
   onQueryChange: (value: string) => void;
-  onRecommend: () => void;
   isLoading: boolean;
-  isRecommending: boolean;
   searchError: string | null;
-  recommendationError: string | null;
-  recommendationReason: string | null;
   resultsCount: number;
-  viewMode: ViewMode;
-  onViewModeChange: (mode: ViewMode) => void;
+  handleRecommend: () => void;
 }
 
 export function SearchCard({
   query,
   onQueryChange,
-  onRecommend,
+  handleRecommend,
   isLoading,
-  isRecommending,
   searchError,
-  recommendationError,
-  recommendationReason,
   resultsCount,
-  viewMode,
-  onViewModeChange,
 }: SearchCardProps) {
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Ricerca</CardTitle>
-        <CardDescription>Inserisci titolo o autore (minimo 2 caratteri)</CardDescription>
+      <CardHeader className="flex justify-between items-center">
+        <div>
+          <CardTitle>Ricerca</CardTitle>
+          <CardDescription>
+            Inserisci titolo o autore (minimo 2 caratteri)
+          </CardDescription>
+        </div>
+        <Tooltip>
+          <TooltipTrigger>
+            <Button
+              size="icon"
+              variant="outline"
+              onClick={handleRecommend}
+              className="self-end text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+            >
+              <RotateCcw />
+            </Button>{" "}
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Consigliami un altro libro</p>
+          </TooltipContent>
+        </Tooltip>
       </CardHeader>
       <CardContent className="space-y-3 pb-6">
         <div className="relative w-full max-w-xl flex items-center gap-2">
@@ -58,13 +67,6 @@ export function SearchCard({
               placeholder="Es. Dune, Calvino, Tolkien..."
             />
           </div>
-          <Button
-            variant="default"
-            onClick={onRecommend}
-            disabled={isLoading || isRecommending}
-          >
-            {isRecommending ? "Consiglio in corso..." : "Consigliami un libro"}
-          </Button>
         </div>
 
         {isLoading && (
@@ -74,36 +76,15 @@ export function SearchCard({
           </div>
         )}
 
-        {searchError && <p className="text-destructive text-sm">{searchError}</p>}
-
-        {recommendationError && (
-          <p className="text-destructive text-sm">{recommendationError}</p>
+        {searchError && (
+          <p className="text-destructive text-sm">{searchError}</p>
         )}
 
-        {recommendationReason && (
-          <p className="text-muted-foreground text-xs">{recommendationReason}</p>
-        )}
-
-        <div className="flex items-center justify-between gap-3 pt-2">
-          <p className="text-muted-foreground text-sm">{resultsCount} risultati trovati</p>
-          <div className="inline-flex rounded-md border p-1">
-            <Button
-              variant={viewMode === "grid" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => onViewModeChange("grid")}
-            >
-              <Grid3X3 className="size-4" />
-              Griglia
-            </Button>
-            <Button
-              variant={viewMode === "table" ? "secondary" : "ghost"}
-              size="sm"
-              onClick={() => onViewModeChange("table")}
-            >
-              <List className="size-4" />
-              Tabella
-            </Button>
-          </div>
+        <div className="flex flex-col justify-between gap-3 pt-2">
+          <p className="text-muted-foreground text-sm">
+            {resultsCount === 0 && ""}
+            {resultsCount > 0 && `${resultsCount} risultati trovati`}
+          </p>
         </div>
       </CardContent>
     </Card>

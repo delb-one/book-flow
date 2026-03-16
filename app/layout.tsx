@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppShell } from "@/components/app-shell";
-import {  JetBrains_Mono, Playfair_Display, Inter } from "next/font/google";
+import { JetBrains_Mono, Playfair_Display, Inter } from "next/font/google";
 
 const fontSans = Inter({
   subsets: ["latin"],
@@ -31,7 +31,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={` ${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}>
+      <body
+        className={` ${fontSans.variable} ${fontSerif.variable} ${fontMono.variable} antialiased`}
+      >
         <ThemeProvider>
           <AppShell>{children}</AppShell>
         </ThemeProvider>

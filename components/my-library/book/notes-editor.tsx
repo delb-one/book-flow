@@ -73,7 +73,7 @@ export function NotesEditor({
         onChange={(event) => setDraft(event.target.value)}
         rows={4}
         placeholder="Scrivi le tue note..."
-        className="resize-none max-h-40 overflow-y-auto "
+        className="resize-none max-h-40 overflow-y-auto bg-card"
       />
       <div className="flex items-center gap-2">
         <Button size="sm" onClick={saveNotes} disabled={isSaving}>
