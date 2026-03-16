@@ -1,6 +1,8 @@
+import ReactMarkdown from "react-markdown";
 import { BookText } from "lucide-react";
 
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import remarkGfm from "remark-gfm";
 
 type BookDescriptionProps = {
   description: string;
@@ -13,8 +15,11 @@ export function BookDescription({ description }: BookDescriptionProps) {
         <BookText className="size-5 text-primary" />
         <p className="text-base font-semibold">Trama</p>
       </CardHeader>
-      <CardContent className="text-muted-foreground text-sm leading-relaxed p-4">
-        {description || "Nessuna descrizione disponibile."}
+
+      <CardContent className="prose prose-sm max-w-none text-muted-foreground p-4">
+        <ReactMarkdown remarkPlugins={[remarkGfm]}>
+          {description || "Nessuna descrizione disponibile."}
+        </ReactMarkdown>
       </CardContent>
     </Card>
   );
