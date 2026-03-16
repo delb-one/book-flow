@@ -75,7 +75,7 @@ export function ResultsGrid({
                       </div>
                     </div>
                   </div>
-                  <div className="flex flex-wrap gap-1">
+                  {/* <div className="flex flex-wrap gap-1">
                     {(book.categories.length
                       ? book.categories
                       : ["Senza categoria"]
@@ -86,7 +86,7 @@ export function ResultsGrid({
                           {category}
                         </Badge>
                       ))}
-                  </div>
+                  </div> */}
                 </CardHeader>
 
                 <CardContent className="space-y-3 pb-6">

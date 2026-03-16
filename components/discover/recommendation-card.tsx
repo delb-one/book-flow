@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 
 import type { SearchResult } from "./types";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { RotateCcw } from "lucide-react";
+import { RotateCcw, ZoomIn } from "lucide-react";
 
 interface RecommendationCardProps {
   book: SearchResult;
@@ -14,6 +14,7 @@ interface RecommendationCardProps {
   onAddClick: (book: SearchResult) => void;
   isSaved: boolean;
   handleRecommend: () => void;
+  onDetailsClick: (book: SearchResult) => void;
 }
 
 export function RecommendationCard({
@@ -22,6 +23,7 @@ export function RecommendationCard({
   onAddClick,
   handleRecommend,
   isSaved,
+  onDetailsClick,
 }: RecommendationCardProps) {
   return (
     <div className="relative flex items-center justify-between gap-6 overflow-hidden rounded-2xl bg-card px-8 py-7 shadow-xl">
@@ -82,21 +84,27 @@ export function RecommendationCard({
       </div>
 
       {/* Right cover */}
-      <div className="relative h-44 w-32 shrink-0 overflow-hidden rounded-xl shadow-2xl">
+      <div
+        className="bg-muted relative h-44 w-32 overflow-hidden rounded-md group cursor-pointer"
+        onClick={() => onDetailsClick(book)}
+      >
         {book.cover ? (
           <Image
             src={book.cover}
             alt={`Copertina di ${book.title}`}
             className="h-full w-full object-cover"
-            width={128}
-            height={176}
+            width={48}
+            height={64}
             unoptimized
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center bg-slate-700 text-xs text-slate-400">
+          <div className="text-muted-foreground flex h-full items-center justify-center text-[10px]">
             No cover
           </div>
         )}
+        <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+          <ZoomIn className="size-4 text-white" />
+        </div>
       </div>
     </div>
   );

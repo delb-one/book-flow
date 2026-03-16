@@ -305,6 +305,7 @@ export default function DiscoverPage() {
               onAddClick={openAddDialog}
               isSaved={savedBookIds.has(recommendation.id)}
               handleRecommend={handleRecommend}
+              onDetailsClick={openDetailsModal}
             />
           ) : null}
         </div>
