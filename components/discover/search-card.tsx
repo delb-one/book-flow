@@ -1,8 +1,7 @@
 "use client";
 
-import { Loader2, RotateCcw, Search } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -11,8 +10,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Tooltip, TooltipTrigger } from "@radix-ui/react-tooltip";
-import { TooltipContent } from "../ui/tooltip";
 
 interface SearchCardProps {
   query: string;
@@ -20,52 +17,42 @@ interface SearchCardProps {
   isLoading: boolean;
   searchError: string | null;
   resultsCount: number;
-  handleRecommend: () => void;
 }
 
 export function SearchCard({
   query,
   onQueryChange,
-  handleRecommend,
   isLoading,
   searchError,
-  resultsCount,
 }: SearchCardProps) {
   return (
-    <Card>
+    <Card className="bg-transparent border-0 shadow-none">
       <CardHeader className="flex justify-between items-center">
-        <div>
+        <div className="space-y-2">
           <CardTitle>Ricerca</CardTitle>
           <CardDescription>
             Inserisci titolo o autore (minimo 2 caratteri)
           </CardDescription>
         </div>
-        <Tooltip>
-          <TooltipTrigger>
-            <Button
-              size="icon"
-              variant="outline"
-              onClick={handleRecommend}
-              className="self-end text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-            >
-              <RotateCcw />
-            </Button>{" "}
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Consigliami un altro libro</p>
-          </TooltipContent>
-        </Tooltip>
       </CardHeader>
       <CardContent className="space-y-3 pb-6">
         <div className="relative w-full max-w-xl flex items-center gap-2">
-          <div>
+          <div className="relative w-full">
             <Search className="text-muted-foreground absolute top-1/2 left-2 size-4 -translate-y-1/2" />
             <Input
               value={query}
               onChange={(event) => onQueryChange(event.target.value)}
-              className="pl-8"
+              className="pl-8 pr-8"
               placeholder="Es. Dune, Calvino, Tolkien..."
             />
+            {query && (
+              <button
+                onClick={() => onQueryChange("")}
+                className="text-muted-foreground hover:text-foreground absolute top-1/2 right-2 -translate-y-1/2 transition-colors"
+              >
+                <X className="size-4" />
+              </button>
+            )}
           </div>
         </div>
 
@@ -79,13 +66,6 @@ export function SearchCard({
         {searchError && (
           <p className="text-destructive text-sm">{searchError}</p>
         )}
-
-        <div className="flex flex-col justify-between gap-3 pt-2">
-          <p className="text-muted-foreground text-sm">
-            {resultsCount === 0 && ""}
-            {resultsCount > 0 && `${resultsCount} risultati trovati`}
-          </p>
-        </div>
       </CardContent>
     </Card>
   );

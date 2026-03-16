@@ -5,28 +5,49 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 import type { SearchResult } from "./types";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { RotateCcw } from "lucide-react";
 
 interface RecommendationCardProps {
   book: SearchResult;
   reason: string | null;
   onAddClick: (book: SearchResult) => void;
   isSaved: boolean;
+  handleRecommend: () => void;
 }
 
 export function RecommendationCard({
   book,
   reason,
   onAddClick,
+  handleRecommend,
   isSaved,
 }: RecommendationCardProps) {
   return (
     <div className="relative flex items-center justify-between gap-6 overflow-hidden rounded-2xl bg-card px-8 py-7 shadow-xl">
       {/* Left content */}
       <div className="flex min-w-0 flex-1 flex-col gap-3">
-        {/* Badge */}
-        <span className="w-fit rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
-          Consigliato per te
-        </span>
+        <div className="flex justify-between items-center">
+          {/* Badge */}
+          <span className="w-fit rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
+            Consigliato per te
+          </span>
+          <Tooltip>
+            <TooltipTrigger>
+              <Button
+                size="icon"
+                variant="outline"
+                onClick={handleRecommend}
+                className="self-end text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
+              >
+                <RotateCcw />
+              </Button>{" "}
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Consigliami un altro libro</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
 
         {/* Title & Author */}
         <div>

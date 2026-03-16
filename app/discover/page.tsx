@@ -90,7 +90,6 @@ export default function DiscoverPage() {
           error?: string;
         };
 
-
         if (!response.ok) {
           throw new Error(payload.error || "Ricerca non disponibile.");
         }
@@ -282,14 +281,14 @@ export default function DiscoverPage() {
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex flex-1 min-h-0 flex-col gap-6">
         {/* Top row: search + recommendation side by side */}
-        <div className="grid h-fit w-full grid-cols-1 gap-6 md:grid-cols-[2fr_1fr]">
+        <div className="grid h-fit w-full grid-cols-1 gap-6 md:grid-cols-[2fr_2fr]">
           <SearchCard
             query={query}
             onQueryChange={setQuery}
             isLoading={isLoading}
             searchError={searchError}
             resultsCount={searchResults.length}
-            handleRecommend={handleRecommend}
+            // handleRecommend={handleRecommend}
           />
 
           {/* Recommendation panel */}
@@ -306,29 +305,40 @@ export default function DiscoverPage() {
               reason={recommendationReason}
               onAddClick={openAddDialog}
               isSaved={savedBookIds.has(recommendation.id)}
+              handleRecommend={handleRecommend}
             />
           ) : null}
         </div>
 
         {searchResults.length > 0 && (
-          <div className="mt-auto flex justify-end">
-            <div className="inline-flex rounded-md border p-1">
-              <Button
-                variant={viewMode === "grid" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("grid")}
-              >
-                <Grid3X3 className="size-4" />
-                Griglia
-              </Button>
-              <Button
-                variant={viewMode === "table" ? "secondary" : "ghost"}
-                size="sm"
-                onClick={() => setViewMode("table")}
-              >
-                <List className="size-4" />
-                Tabella
-              </Button>
+          <div className="flex justify-between items-center">
+            <div className="flex flex-col justify-between gap-3 pt-2">
+              <p className="text-muted-foreground text-sm">
+                {searchResults.length === 0 && ""}
+                {searchResults.length > 0 &&
+                  `${searchResults.length} risultati trovati`}
+              </p>
+            </div>
+
+            <div className="mt-auto flex justify-end">
+              <div className="inline-flex rounded-md border p-1">
+                <Button
+                  variant={viewMode === "grid" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("grid")}
+                >
+                  <Grid3X3 className="size-4" />
+                  Griglia
+                </Button>
+                <Button
+                  variant={viewMode === "table" ? "secondary" : "ghost"}
+                  size="sm"
+                  onClick={() => setViewMode("table")}
+                >
+                  <List className="size-4" />
+                  Tabella
+                </Button>
+              </div>
             </div>
           </div>
         )}
