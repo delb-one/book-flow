@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { AddDialog } from "@/components/discover/add-dialog";
 import { BookDetailsModal } from "@/components/discover/book-details-modal";
@@ -168,7 +168,7 @@ export default function DiscoverPage() {
   }, [searchResults, detailsBookId, recommendation]);
 
   // ── Recommendation fetch ──
-  async function handleRecommend() {
+  const handleRecommend = useCallback(async () => {
     setIsRecommending(true);
     setRecommendationError(null);
     setRecommendationReason(null);
@@ -202,7 +202,7 @@ export default function DiscoverPage() {
     } finally {
       setIsRecommending(false);
     }
-  }
+  }, []);
 
   // ── Add book ──
   async function handleAddBook() {

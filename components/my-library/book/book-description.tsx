@@ -34,7 +34,7 @@ export function BookDescription({ description }: { description: string }) {
         <div
           ref={containerRef}
           style={{ maxHeight }}
-          className="prose prose-sm max-w-none overflow-y-auto no-scrollbar transition-all dark:prose-invert"
+          className="prose prose-sm max-w-none overflow-y-auto no-scrollbar transition-all dark:prose-invert p-2"
         >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {description || "Nessuna descrizione disponibile."}
