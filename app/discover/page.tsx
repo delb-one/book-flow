@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import { AddDialog } from "@/components/discover/add-dialog";
 import { BookDetailsModal } from "@/components/discover/book-details-modal";
@@ -54,6 +54,9 @@ export default function DiscoverPage() {
   const [savedBookIds, setSavedBookIds] = useState<Set<string>>(new Set());
   const [detailsBookId, setDetailsBookId] = useState<string | null>(null);
 
+  // ── Ref per tracciare se il fetch è in corso ──
+  const isFetchingRef = useRef(false);
+
   // ── Debounce query ──
   useEffect(() => {
     const timeout = setTimeout(() => {
@@ -64,7 +67,61 @@ export default function DiscoverPage() {
 
   // ── Fetch recommendation on mount ──
   useEffect(() => {
-    handleRecommend();
+    // Previeni fetch multipli simultanei (Strict Mode)
+    if (isFetchingRef.current) return;
+    isFetchingRef.current = true;
+
+    let cancelled = false;
+
+    async function fetchRecommendation() {
+      setIsRecommending(true);
+      setRecommendationError(null);
+      setRecommendationReason(null);
+      setRecommendation(null);
+
+      try {
+        const response = await fetch("/api/recommendation");
+        const payload = (await response.json()) as {
+          result?: SearchResult;
+          reason?: { category?: string; message?: string };
+          error?: string;
+        };
+
+        if (!response.ok || !payload.result) {
+          throw new Error(payload.error || "Impossibile trovare un consiglio.");
+        }
+
+        if (!cancelled) {
+
+          setRecommendation(payload.result);
+          setRecommendationReason(
+            payload.reason?.message ||
+              (payload.reason?.category
+                ? `Consiglio basato su: ${payload.reason.category}`
+                : null),
+          );
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setRecommendationError(
+            error instanceof Error
+              ? error.message
+              : "Errore durante la raccomandazione.",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setIsRecommending(false);
+        }
+      }
+    }
+
+    fetchRecommendation();
+
+    return () => {
+      cancelled = true;
+      isFetchingRef.current = false;
+    };
   }, []);
 
   // ── Search effect ──

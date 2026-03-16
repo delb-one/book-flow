@@ -29,7 +29,7 @@ export function BookDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[70vh] flex flex-col">
+      <DialogContent className="max-w-2xl max-h-[70vh] flex flex-col" aria-describedby="">
         <DialogHeader>
           <div className="flex gap-6">
             <div className="bg-muted relative h-48 w-32 shrink-0 overflow-hidden rounded-md">
