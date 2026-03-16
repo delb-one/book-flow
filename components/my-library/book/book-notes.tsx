@@ -10,7 +10,7 @@ type BookNotesProps = {
 
 export function BookNotes({ bookId, initialNotes }: BookNotesProps) {
   return (
-    <Card className="bg-muted/40">
+    <Card className="bg-muted/40 max-h-125">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="flex items-center gap-2">
           <PencilLine className="size-5 text-primary" />

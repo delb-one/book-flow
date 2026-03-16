@@ -75,7 +75,7 @@ export function BookControls({
   };
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 flex flex-row sm:flex-col items-start gap-4 justify-between">
       <div className="space-y-2">
         <p className="text-muted-foreground text-xs font-semibold uppercase tracking-wide">
           Stato lettura

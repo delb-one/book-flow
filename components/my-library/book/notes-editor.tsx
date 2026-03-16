@@ -71,15 +71,12 @@ export function NotesEditor({
       <Textarea
         value={draft}
         onChange={(event) => setDraft(event.target.value)}
-        rows={6}
+        rows={4}
         placeholder="Scrivi le tue note..."
+        className="resize-none max-h-40 overflow-y-auto "
       />
       <div className="flex items-center gap-2">
-        <Button
-          size="sm"
-          onClick={saveNotes}
-          disabled={isSaving}
-        >
+        <Button size="sm" onClick={saveNotes} disabled={isSaving}>
           {isSaving ? "Salvataggio..." : "Salva"}
         </Button>
         <Button

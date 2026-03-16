@@ -10,7 +10,12 @@ type BookHeaderProps = {
   categories: string[];
 };
 
-export function BookHeader({ title, author, authorSlug, categories }: BookHeaderProps) {
+export function BookHeader({
+  title,
+  author,
+  authorSlug,
+  categories,
+}: BookHeaderProps) {
   return (
     <header className="space-y-2">
       <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
@@ -24,12 +29,14 @@ export function BookHeader({ title, author, authorSlug, categories }: BookHeader
         </Button>
       </p>
 
-      <div className="flex flex-wrap gap-2">
-        {categories.map((category) => (
-          <Badge key={category} variant="outline">
-            {category}
-          </Badge>
-        ))}
+      <div>
+        <div className="flex flex-wrap gap-2">
+          {categories.map((category) => (
+            <Badge key={category} variant="outline">
+              {category}
+            </Badge>
+          ))}
+        </div>
       </div>
     </header>
   );

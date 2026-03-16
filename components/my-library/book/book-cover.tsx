@@ -10,7 +10,7 @@ type BookCoverProps = {
 export function BookCover({ cover, title }: BookCoverProps) {
   return (
     <Card className="overflow-hidden">
-      <div className="relative aspect-3/4 w-full bg-muted">
+      <div className="relative aspect-square sm:aspect-3/4 w-full bg-muted">
         {cover ? (
           <Image
             src={cover}

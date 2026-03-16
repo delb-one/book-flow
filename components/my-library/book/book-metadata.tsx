@@ -1,34 +1,34 @@
-import { Card, CardContent } from "@/components/ui/card";
+import { Calendar, BookOpen, Building } from "lucide-react";
 
-type BookMetadataProps = {
-  publisher: string | null;
-  year: number | null;
-  pages: number | null;
+type Props = {
+  publisher?: string;
+  year?: number;
+  pages?: number;
 };
 
-export function BookMetadata({ publisher, year, pages }: BookMetadataProps) {
+export function BookMetadata({ publisher, year, pages }: Props) {
   return (
-    <Card>
-      <CardContent className="grid gap-4 py-4 sm:grid-cols-2 lg:grid-cols-3">
-        <div className="space-y-1">
-          <p className="text-muted-foreground text-xs font-semibold uppercase">
-            Editore
-          </p>
-          <p className="text-sm font-medium">{publisher || "-"}</p>
-        </div>
-        <div className="space-y-1">
-          <p className="text-muted-foreground text-xs font-semibold uppercase">
-            Anno
-          </p>
-          <p className="text-sm font-medium">{year || "-"}</p>
-        </div>
-        <div className="space-y-1">
-          <p className="text-muted-foreground text-xs font-semibold uppercase">
-            Pagine
-          </p>
-          <p className="text-sm font-medium">{pages ? `${pages}` : "-"}</p>
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
+      {publisher && (
+        <span className="flex items-center gap-1">
+          <Building className="size-4" />
+          {publisher}
+        </span>
+      )}
+
+      {year && (
+        <span className="flex items-center gap-1">
+          <Calendar className="size-4" />
+          {year}
+        </span>
+      )}
+
+      {pages && (
+        <span className="flex items-center gap-1">
+          <BookOpen className="size-4" />
+          {pages} pages
+        </span>
+      )}
+    </div>
   );
 }

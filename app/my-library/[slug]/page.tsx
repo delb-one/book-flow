@@ -26,15 +26,15 @@ export default async function MyLibraryBookPage({
   }
 
   return (
-    <div className="mx-auto w-full space-y-8">
+    <div className="mx-auto w-full space-y-6">
       <BackButton title="Torna alla libreria" url="/my-library" />
 
-      <div className="grid gap-8 lg:grid-cols-[320px_1fr]">
-        <div className="space-y-6">
+      <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
+        <div className="space-y-4">
           <BookCover cover={book.cover} title={book.title} />
 
           <Card>
-            <CardContent className="space-y-4 p-4">
+            <CardContent className="p-4">
               <BookControls
                 bookId={book.id}
                 initialStatus={book.status}
@@ -44,7 +44,7 @@ export default async function MyLibraryBookPage({
           </Card>
         </div>
 
-        <div className="space-y-6">
+        <div className="space-y-4">
           <BookHeader
             title={book.title}
             author={book.author}
@@ -58,9 +58,13 @@ export default async function MyLibraryBookPage({
             pages={book.pages}
           />
 
-          <BookDescription description={book.description} />
+          <div className="grid gap-6 lg:grid-cols-[3fr_1fr]">
+            <BookDescription description={book.description} />
 
-          <BookNotes bookId={book.id} initialNotes={book.notes} />
+            <div className="max-h-125 overflow-y-auto">
+              <BookNotes bookId={book.id} initialNotes={book.notes} />
+            </div>
+          </div>
         </div>
       </div>
     </div>
