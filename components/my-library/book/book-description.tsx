@@ -1,9 +1,5 @@
 "use client";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { BookText } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import ReactMarkdown from "react-markdown";
@@ -38,7 +34,7 @@ export function BookDescription({ description }: { description: string }) {
         <div
           ref={containerRef}
           style={{ maxHeight }}
-          className="prose prose-sm max-w-none text-muted-foreground overflow-y-auto no-scrollbar transition-all"
+          className="prose prose-sm max-w-none overflow-y-auto no-scrollbar transition-all dark:prose-invert"
         >
           <ReactMarkdown remarkPlugins={[remarkGfm]}>
             {description || "Nessuna descrizione disponibile."}

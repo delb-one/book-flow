@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PaginationSticky } from "@/components/my-library/pagination-sticky";
 
 import type { SearchResult } from "./types";
+import { ZoomIn } from "lucide-react";
 
 interface ResultsTableProps {
   results: SearchResult[];
@@ -47,7 +48,7 @@ export function ResultsTable({
               return (
                 <tr key={book.id} className="border-t">
                   <td className="px-3 py-2">
-                    <div className="bg-muted h-16 w-12 overflow-hidden rounded-md">
+                    <div className="bg-muted relative h-16 w-12 overflow-hidden rounded-md group cursor-pointer">
                       {book.cover ? (
                         <Image
                           src={book.cover}
@@ -56,12 +57,16 @@ export function ResultsTable({
                           width={48}
                           height={64}
                           unoptimized
+                          
                         />
                       ) : (
                         <div className="text-muted-foreground flex h-full items-center justify-center text-[10px]">
                           No cover
                         </div>
                       )}
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ZoomIn className="size-4 text-white" />
+                      </div>
                     </div>
                   </td>
                   <td className="px-3 py-2">
@@ -78,7 +83,10 @@ export function ResultsTable({
                   </td>
                   <td className="px-3 py-2">
                     <div className="flex flex-wrap gap-1">
-                      {(book.categories.length ? book.categories : ["Senza categoria"])
+                      {(book.categories.length
+                        ? book.categories
+                        : ["Senza categoria"]
+                      )
                         .slice(0, 3)
                         .map((category) => (
                           <Badge key={category} variant="outline">

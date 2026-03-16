@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { PaginationSticky } from "@/components/my-library/pagination-sticky";
 
 import type { SearchResult } from "./types";
+import { ZoomIn } from "lucide-react";
 
 interface ResultsGridProps {
   results: SearchResult[];
@@ -37,21 +38,24 @@ export function ResultsGrid({
               <Card key={book.id}>
                 <CardHeader>
                   <div className="mb-2 flex gap-3">
-                    <div className="bg-muted h-28 w-20 shrink-0 overflow-hidden rounded-md">
+                    <div className="bg-muted relative h-16 w-12 overflow-hidden rounded-md group cursor-pointer">
                       {book.cover ? (
                         <Image
                           src={book.cover}
                           alt={`Copertina di ${book.title}`}
                           className="h-full w-full object-cover"
-                          width={80}
-                          height={112}
+                          width={48}
+                          height={64}
                           unoptimized
                         />
                       ) : (
-                        <div className="text-muted-foreground flex h-full items-center justify-center text-xs">
+                        <div className="text-muted-foreground flex h-full items-center justify-center text-[10px]">
                           No cover
                         </div>
                       )}
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <ZoomIn className="size-4 text-white" />
+                      </div>
                     </div>
                     <div className="min-w-0 space-y-1">
                       <CardTitle className="line-clamp-2 text-lg">
@@ -67,7 +71,10 @@ export function ResultsGrid({
                     </div>
                   </div>
                   <div className="flex flex-wrap gap-1">
-                    {(book.categories.length ? book.categories : ["Senza categoria"])
+                    {(book.categories.length
+                      ? book.categories
+                      : ["Senza categoria"]
+                    )
                       .slice(0, 3)
                       .map((category) => (
                         <Badge key={category} variant="outline">

@@ -63,7 +63,6 @@ export default function DiscoverPage() {
   // ── Fetch recommendation on mount ──
   useEffect(() => {
     handleRecommend();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ── Search effect ──
@@ -88,6 +87,7 @@ export default function DiscoverPage() {
           results?: SearchResult[];
           error?: string;
         };
+
 
         if (!response.ok) {
           throw new Error(payload.error || "Ricerca non disponibile.");
