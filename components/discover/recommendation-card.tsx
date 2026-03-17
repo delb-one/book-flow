@@ -5,7 +5,6 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 
 import type { SearchResult } from "./types";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { RotateCcw, ZoomIn } from "lucide-react";
 
 interface RecommendationCardProps {
@@ -34,21 +33,6 @@ export function RecommendationCard({
           <span className="w-fit rounded-full bg-primary px-3 py-1 text-xs font-semibold uppercase tracking-wide text-primary-foreground">
             Consigliato per te
           </span>
-          <Tooltip>
-            <TooltipTrigger>
-              <Button
-                size="icon"
-                variant="outline"
-                onClick={handleRecommend}
-                className="self-end text-xs text-muted-foreground hover:text-foreground transition-colors underline underline-offset-2"
-              >
-                <RotateCcw />
-              </Button>{" "}
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Consigliami un altro libro</p>
-            </TooltipContent>
-          </Tooltip>
         </div>
 
         {/* Title & Author */}
@@ -65,7 +49,7 @@ export function RecommendationCard({
         )}
 
         {/* Button */}
-        <div className="mt-2">
+        <div className="mt-2 flex items-center justify-between gap-2">
           <Button
             onClick={() => {
               if (isSaved) return;
@@ -79,6 +63,16 @@ export function RecommendationCard({
             {isSaved
               ? "Già aggiunto in questa sessione"
               : "Aggiungi alla libreria"}
+          </Button>
+
+          <Button
+            size="lg"
+            variant="outline" // o secondary
+            onClick={handleRecommend}
+            className="rounded-xl px-6 font-semibold"
+          >
+            <RotateCcw />
+            Consigliane un altro
           </Button>
         </div>
       </div>

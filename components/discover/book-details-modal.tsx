@@ -29,17 +29,26 @@ export function BookDetailsModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[70vh] flex flex-col" aria-describedby="">
+      <DialogContent
+        className="max-w-[90vw] md:max-w-5xl max-h-[80vh] flex flex-col"
+        aria-describedby=""
+      >
         <DialogHeader>
-          <div className="flex gap-6">
-            <div className="bg-muted relative h-48 w-32 shrink-0 overflow-hidden rounded-md">
+          <DialogTitle className="text-2xl">{book.title}</DialogTitle>
+        </DialogHeader>
+
+        {/* Container principale: cover a sinistra, resto a destra */}
+        <div className="mt-4 flex flex-col md:flex-row flex-1 gap-6 overflow-y-auto no-scrollbar">
+          {/* Colonna sinistra: solo cover */}
+          <div className="shrink-0 w-full md:w-48">
+            <div className="bg-muted relative h-64 w-full overflow-hidden rounded-md">
               {book.cover ? (
                 <Image
                   src={book.cover}
                   alt={`Copertina di ${book.title}`}
                   className="h-full w-full object-cover"
-                  width={128}
-                  height={192}
+                  width={192}
+                  height={256}
                   unoptimized
                 />
               ) : (
@@ -48,12 +57,14 @@ export function BookDetailsModal({
                 </div>
               )}
             </div>
-            <div className="min-w-0 flex-1 space-y-3">
-              <DialogTitle className="line-clamp-2 text-xl">
-                {book.title}
-              </DialogTitle>
+          </div>
+
+          {/* Colonna destra: titolo, autore, info, categorie e descrizione */}
+          <div className="flex-1 flex flex-col gap-4">
+            <div className="space-y-2">
               <p className="text-muted-foreground text-base">{book.author}</p>
-              <div className="flex flex-wrap gap-4 text-sm">
+
+              <div className="flex flex-wrap gap-2 text-sm">
                 {book.year && (
                   <div>
                     <span className="text-muted-foreground">Anno: </span>
@@ -67,6 +78,7 @@ export function BookDetailsModal({
                   </div>
                 )}
               </div>
+
               <div className="flex flex-wrap gap-1">
                 {(book.categories.length
                   ? book.categories
@@ -78,15 +90,16 @@ export function BookDetailsModal({
                 ))}
               </div>
             </div>
+
+            {book.description && (
+              <div className="prose prose-sm max-w-none flex-1 overflow-y-auto no-scrollbar dark:prose-invert">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {book.description}
+                </ReactMarkdown>
+              </div>
+            )}
           </div>
-        </DialogHeader>
-        {book.description && (
-          <div className="prose prose-sm max-w-none overflow-y-auto no-scrollbar dark:prose-invert min-h-0 flex-1">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {book.description}
-            </ReactMarkdown>
-          </div>
-        )}
+        </div>
       </DialogContent>
     </Dialog>
   );
