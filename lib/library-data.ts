@@ -13,6 +13,7 @@ export type LibraryBook = {
   pages: number;
   description: string;
   cover: string | null;
+  covers: string[];
   categories: string[];
   status: ReadingStatus;
   progress: number;
@@ -30,7 +31,6 @@ type LibraryJoinedRow = {
   rating: number | null;
   notes: string | null;
   added_at: string | null;
-  custom_cover: string | null;
   books:
     | {
         id: string;
@@ -71,7 +71,6 @@ async function fetchLibraryBooks(): Promise<LibraryBook[]> {
       rating,
       notes,
       added_at,
-      custom_cover,
       books:books!library_books_book_id_fkey(
         id,
         title,
@@ -94,25 +93,57 @@ async function fetchLibraryBooks(): Promise<LibraryBook[]> {
   const rows = (data ?? []) as unknown as LibraryJoinedRow[];
   if (rows.length === 0) return [];
 
-  const customCoverUrls = await Promise.all(
-    rows.map(async (row) => {
-      const coverPath = row.custom_cover?.trim();
-      if (!coverPath) return null;
+  const bookIds = rows
+    .map((row) => row.books?.id ?? null)
+    .filter((id): id is string => Boolean(id));
 
-      const { data: signedData } = await supabase.storage
-        .from(CUSTOM_COVER_BUCKET)
-        .createSignedUrl(coverPath, CUSTOM_COVER_URL_TTL_SECONDS);
+  const { data: coverRows } = await supabase
+    .from("library_book_covers")
+    .select("book_id, path, position")
+    .in("book_id", bookIds)
+    .order("position", { ascending: true });
 
-      return signedData?.signedUrl ?? null;
-    }),
+  const coverPathsByBook = new Map<
+    string,
+    { path: string; position: number | null }[]
+  >();
+
+  for (const row of coverRows ?? []) {
+    if (!row.book_id || !row.path) continue;
+    if (!coverPathsByBook.has(row.book_id)) {
+      coverPathsByBook.set(row.book_id, []);
+    }
+    coverPathsByBook.get(row.book_id)?.push({
+      path: row.path,
+      position: row.position ?? null,
+    });
+  }
+
+  const signedUrlByPath = new Map<string, string>();
+  await Promise.all(
+    Array.from(coverPathsByBook.values())
+      .flat()
+      .map(async ({ path }) => {
+        if (!path || signedUrlByPath.has(path)) return;
+        const { data: signedData } = await supabase.storage
+          .from(CUSTOM_COVER_BUCKET)
+          .createSignedUrl(path, CUSTOM_COVER_URL_TTL_SECONDS);
+        if (signedData?.signedUrl) {
+          signedUrlByPath.set(path, signedData.signedUrl);
+        }
+      }),
   );
 
   return rows
-    .map((row, index) => {
+    .map((row) => {
       const book = row.books;
       if (!book) return null;
       const author = Array.isArray(book.authors) ? book.authors[0] : book.authors;
-      const customCoverUrl = customCoverUrls[index] ?? null;
+      const coverEntries = coverPathsByBook.get(book.id) ?? [];
+      const customCovers = coverEntries
+        .map((entry) => signedUrlByPath.get(entry.path))
+        .filter((url): url is string => Boolean(url));
+      const primaryCover = customCovers[0] ?? book.cover ?? null;
 
       return {
         id: book.id,
@@ -123,7 +154,8 @@ async function fetchLibraryBooks(): Promise<LibraryBook[]> {
         publisher: book.publisher ?? "",
         pages: book.pages ?? 0,
         description: book.description ?? "",
-        cover: customCoverUrl ?? book.cover ?? null,
+        cover: primaryCover,
+        covers: customCovers,
         categories: book.categories ?? [],
         status: row.status ?? "unread",
         progress: row.progress ?? 0,

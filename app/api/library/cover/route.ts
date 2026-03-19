@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const objectPath = `library/${bookId}/cover.${extension}`;
+  const filename = `${crypto.randomUUID()}.${extension}`;
+  const objectPath = `library/${bookId}/${filename}`;
   const supabase = createServerSupabaseClient();
 
   try {
@@ -64,24 +65,36 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: updatedRow, error: updateError } = await supabase
-      .from("library_books")
-      .update({ custom_cover: objectPath })
+    const { data: lastPositionRow, error: positionError } = await supabase
+      .from("library_book_covers")
+      .select("position")
       .eq("book_id", bookId)
-      .select("id")
+      .order("position", { ascending: false })
+      .limit(1)
       .maybeSingle();
 
-    if (updateError) {
+    if (positionError) {
       return NextResponse.json(
-        { error: "Errore nell'aggiornamento della cover." },
+        { error: "Errore nel recupero della posizione cover." },
         { status: 500 },
       );
     }
 
-    if (!updatedRow?.id) {
+    const position = (lastPositionRow?.position ?? -1) + 1;
+
+    const { error: insertError } = await supabase
+      .from("library_book_covers")
+      .insert({
+        id: crypto.randomUUID(),
+        book_id: bookId,
+        path: objectPath,
+        position,
+      });
+
+    if (insertError) {
       return NextResponse.json(
-        { error: "Libro non trovato in libreria." },
-        { status: 404 },
+        { error: "Errore nel salvataggio della cover." },
+        { status: 500 },
       );
     }
 

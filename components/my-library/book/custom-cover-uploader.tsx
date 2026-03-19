@@ -12,32 +12,34 @@ type CustomCoverUploaderProps = {
 
 export function CustomCoverUploader({ bookId }: CustomCoverUploaderProps) {
   const router = useRouter();
-  const [file, setFile] = useState<File | null>(null);
+  const [files, setFiles] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   async function handleUpload() {
-    if (!file || isUploading) return;
+    if (files.length === 0 || isUploading) return;
 
     setIsUploading(true);
     setErrorMessage(null);
 
     try {
-      const formData = new FormData();
-      formData.append("bookId", bookId);
-      formData.append("file", file);
+      for (const file of files) {
+        const formData = new FormData();
+        formData.append("bookId", bookId);
+        formData.append("file", file);
 
-      const response = await fetch("/api/library/cover", {
-        method: "POST",
-        body: formData,
-      });
+        const response = await fetch("/api/library/cover", {
+          method: "POST",
+          body: formData,
+        });
 
-      const payload = (await response.json()) as { error?: string };
-      if (!response.ok) {
-        throw new Error(payload.error ?? "Errore nel caricamento.");
+        const payload = (await response.json()) as { error?: string };
+        if (!response.ok) {
+          throw new Error(payload.error ?? "Errore nel caricamento.");
+        }
       }
 
-      setFile(null);
+      setFiles([]);
       router.refresh();
     } catch (error) {
       const message = error instanceof Error ? error.message : "Errore imprevisto.";
@@ -52,15 +54,16 @@ export function CustomCoverUploader({ bookId }: CustomCoverUploaderProps) {
       <Input
         type="file"
         accept="image/png,image/jpeg,image/webp"
-        onChange={(event) => setFile(event.target.files?.[0] ?? null)}
+        multiple
+        onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
       />
       <Button
         type="button"
         onClick={handleUpload}
-        disabled={!file || isUploading}
+        disabled={files.length === 0 || isUploading}
         className="w-full"
       >
-        {isUploading ? "Caricamento..." : "Carica cover personalizzata"}
+        {isUploading ? "Caricamento..." : "Carica cover personalizzate"}
       </Button>
       {errorMessage ? (
         <p className="text-sm text-destructive">{errorMessage}</p>

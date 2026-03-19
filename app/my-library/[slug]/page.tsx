@@ -4,7 +4,7 @@ import { getLibraryBooks } from "@/lib/library-data";
 import { slugify } from "@/lib/utils";
 
 import { BackButton } from "@/components/back-button";
-import { BookCover } from "@/components/my-library/book/book-cover";
+import { CoverCarousel } from "@/components/my-library/book/cover-carousel";
 import { CustomCoverUploader } from "@/components/my-library/book/custom-cover-uploader";
 import { BookHeader } from "@/components/my-library/book/book-header";
 import { BookMetadata } from "@/components/my-library/book/book-metadata";
@@ -32,7 +32,11 @@ export default async function MyLibraryBookPage({
 
       <div className="grid gap-6 lg:grid-cols-[260px_1fr]">
         <div className="space-y-4">
-          <BookCover cover={book.cover} title={book.title} />
+          <CoverCarousel
+            covers={book.covers}
+            fallbackCover={book.cover}
+            title={book.title}
+          />
           <CustomCoverUploader bookId={book.id} />
 
           <Card>
