@@ -56,6 +56,7 @@ export function CustomCoverUploader({ bookId }: CustomCoverUploaderProps) {
         accept="image/png,image/jpeg,image/webp"
         multiple
         onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
+        className="cursor-pointer hover:bg-red"
       />
       <Button
         type="button"
