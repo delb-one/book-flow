@@ -30,6 +30,7 @@ type LibraryJoinedRow = {
   rating: number | null;
   notes: string | null;
   added_at: string | null;
+  custom_cover: string | null;
   books:
     | {
         id: string;
@@ -54,6 +55,9 @@ type LibraryJoinedRow = {
     | null;
 };
 
+const CUSTOM_COVER_BUCKET = "personal-book-covers";
+const CUSTOM_COVER_URL_TTL_SECONDS = 60 * 60;
+
 async function fetchLibraryBooks(): Promise<LibraryBook[]> {
   const supabase = createServerSupabaseClient();
 
@@ -67,6 +71,7 @@ async function fetchLibraryBooks(): Promise<LibraryBook[]> {
       rating,
       notes,
       added_at,
+      custom_cover,
       books:books!library_books_book_id_fkey(
         id,
         title,
@@ -89,11 +94,25 @@ async function fetchLibraryBooks(): Promise<LibraryBook[]> {
   const rows = (data ?? []) as unknown as LibraryJoinedRow[];
   if (rows.length === 0) return [];
 
+  const customCoverUrls = await Promise.all(
+    rows.map(async (row) => {
+      const coverPath = row.custom_cover?.trim();
+      if (!coverPath) return null;
+
+      const { data: signedData } = await supabase.storage
+        .from(CUSTOM_COVER_BUCKET)
+        .createSignedUrl(coverPath, CUSTOM_COVER_URL_TTL_SECONDS);
+
+      return signedData?.signedUrl ?? null;
+    }),
+  );
+
   return rows
-    .map((row) => {
+    .map((row, index) => {
       const book = row.books;
       if (!book) return null;
       const author = Array.isArray(book.authors) ? book.authors[0] : book.authors;
+      const customCoverUrl = customCoverUrls[index] ?? null;
 
       return {
         id: book.id,
@@ -104,7 +123,7 @@ async function fetchLibraryBooks(): Promise<LibraryBook[]> {
         publisher: book.publisher ?? "",
         pages: book.pages ?? 0,
         description: book.description ?? "",
-        cover: book.cover ?? null,
+        cover: customCoverUrl ?? book.cover ?? null,
         categories: book.categories ?? [],
         status: row.status ?? "unread",
         progress: row.progress ?? 0,
