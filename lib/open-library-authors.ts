@@ -2,6 +2,9 @@ import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { unstable_cache } from "next/cache";
 import type { AuthorCard } from "@/types/authors";
 
+const CUSTOM_COVER_BUCKET = "personal-book-covers";
+const CUSTOM_COVER_URL_TTL_SECONDS = 60 * 60;
+
 type LibraryAuthorRow = {
   book_id: string | null;
   books:
@@ -97,6 +100,40 @@ async function fetchLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> {
   const rows = (data ?? []) as unknown as LibraryAuthorRow[];
   if (rows.length === 0) return [];
 
+  const bookIds = rows
+    .map((row) => row.books?.id ?? null)
+    .filter((id): id is string => Boolean(id));
+
+  const { data: coverRows } = await supabase
+    .from("library_book_covers")
+    .select("book_id, path, position")
+    .in("book_id", bookIds)
+    .order("position", { ascending: true });
+
+  const coverPathsByBook = new Map<string, string[]>();
+  for (const row of coverRows ?? []) {
+    if (!row.book_id || !row.path) continue;
+    if (!coverPathsByBook.has(row.book_id)) {
+      coverPathsByBook.set(row.book_id, []);
+    }
+    coverPathsByBook.get(row.book_id)?.push(row.path);
+  }
+
+  const signedUrlByPath = new Map<string, string>();
+  await Promise.all(
+    Array.from(coverPathsByBook.values())
+      .flat()
+      .map(async (path) => {
+        if (!path || signedUrlByPath.has(path)) return;
+        const { data: signedData } = await supabase.storage
+          .from(CUSTOM_COVER_BUCKET)
+          .createSignedUrl(path, CUSTOM_COVER_URL_TTL_SECONDS);
+        if (signedData?.signedUrl) {
+          signedUrlByPath.set(path, signedData.signedUrl);
+        }
+      }),
+  );
+
   const map = new Map<string, AuthorAggregate>();
 
   for (const row of rows) {
@@ -132,7 +169,14 @@ async function fetchLibraryAuthorsFromOpenLibrary(): Promise<AuthorCard[]> {
 
     entry.bookIds.add(book.id);
 
-    if (book.cover && !entry.covers.includes(book.cover)) {
+    const customCovers = coverPathsByBook.get(book.id) ?? [];
+    const primaryCustom = customCovers[0]
+      ? signedUrlByPath.get(customCovers[0])
+      : null;
+
+    if (primaryCustom && !entry.covers.includes(primaryCustom)) {
+      entry.covers.push(primaryCustom);
+    } else if (book.cover && !entry.covers.includes(book.cover)) {
       entry.covers.push(book.cover);
     }
   }
