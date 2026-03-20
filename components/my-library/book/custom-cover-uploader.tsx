@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 
 type CustomCoverUploaderProps = {
   bookId: string;
@@ -42,7 +43,8 @@ export function CustomCoverUploader({ bookId }: CustomCoverUploaderProps) {
       setFiles([]);
       router.refresh();
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Errore imprevisto.";
+      const message =
+        error instanceof Error ? error.message : "Errore imprevisto.";
       setErrorMessage(message);
     } finally {
       setIsUploading(false);
@@ -56,7 +58,7 @@ export function CustomCoverUploader({ bookId }: CustomCoverUploaderProps) {
         accept="image/png,image/jpeg,image/webp"
         multiple
         onChange={(event) => setFiles(Array.from(event.target.files ?? []))}
-        className="cursor-pointer hover:bg-red"
+        className="cursor-pointer"
       />
       <Button
         type="button"
@@ -64,7 +66,14 @@ export function CustomCoverUploader({ bookId }: CustomCoverUploaderProps) {
         disabled={files.length === 0 || isUploading}
         className="w-full"
       >
-        {isUploading ? "Caricamento..." : "Carica cover personalizzate"}
+        {isUploading ? (
+          <>
+            <Loader2 className="size-4 animate-spin" />
+            Caricamento immagine...
+          </>
+        ) : (
+          "Carica cover personalizzate"
+        )}
       </Button>
       {errorMessage ? (
         <p className="text-sm text-destructive">{errorMessage}</p>

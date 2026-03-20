@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { Bookmark, BookOpen, CheckCircle2, Star } from "lucide-react";
+import { Bookmark, BookOpen, CheckCircle2, Loader2, Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -184,7 +184,14 @@ export function AddDialog({
 
         <DialogFooter>
           <Button onClick={onConfirm} disabled={isSaving || !selectedBook}>
-            {isSaving ? "Salvataggio..." : "Aggiungi alla libreria"}
+            {isSaving ? (
+              <>
+                <Loader2 className="size-4 animate-spin" />
+                Salvataggio...
+              </>
+            ) : (
+              "Aggiungi alla libreria"
+            )}
           </Button>
         </DialogFooter>
       </DialogContent>

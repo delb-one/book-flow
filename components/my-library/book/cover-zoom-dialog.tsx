@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -96,24 +96,24 @@ export function CoverZoomDialog({
     );
   }
 
-  // function handleZoomIn() {
-  //   setZoomLevel((prev) => Math.min(4, Number((prev + 0.2).toFixed(2))));
-  // }
+  function handleZoomIn() {
+    setZoomLevel((prev) => Math.min(4, Number((prev + 0.2).toFixed(2))));
+  }
 
-  // function handleZoomOut() {
-  //   setZoomLevel((prev) => {
-  //     const next = Math.max(1, Number((prev - 0.2).toFixed(2)));
-  //     if (next <= 1) {
-  //       setPanOffset({ x: 0, y: 0 });
-  //     }
-  //     return next;
-  //   });
-  // }
+  function handleZoomOut() {
+    setZoomLevel((prev) => {
+      const next = Math.max(1, Number((prev - 0.2).toFixed(2)));
+      if (next <= 1) {
+        setPanOffset({ x: 0, y: 0 });
+      }
+      return next;
+    });
+  }
 
-  // function handleResetView() {
-  //   setZoomLevel(1);
-  //   setPanOffset({ x: 0, y: 0 });
-  // }
+  function handleResetView() {
+    setZoomLevel(1);
+    setPanOffset({ x: 0, y: 0 });
+  }
 
   function handleDoubleClick(event: React.MouseEvent<HTMLDivElement>) {
     event.preventDefault();
@@ -215,30 +215,30 @@ export function CoverZoomDialog({
             </div>
           </div>
         </div>
+          {/* CONTROLLI */}
+          <div className="flex items-center justify-between p-3 ">
+            <p className="text-xs opacity-70">
+              Usa la rotella per zoomare (1x - 4x)
+            </p>
 
-        {/* CONTROLLI */}
-        <div className="flex items-center justify-between p-3 ">
-          <p className="text-xs opacity-70">
-            Usa la rotella per zoomare (1x - 4x)
-          </p>
-
-          <div className="flex items-center gap-2">
-            {total > 1 ? (
-              <span className="text-xs opacity-70">
-                {currentIndex + 1} / {total}
-              </span>
-            ) : null}
-            {/* <Button size="sm" variant="outline" onClick={handleZoomOut}>
-              -
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleZoomIn}>
-              +
-            </Button>
-            <Button size="sm" variant="outline" onClick={handleResetView}>
-              Reset
-            </Button> */}
+            <div className="flex items-center gap-2">
+              {total > 1 ? (
+                <span className="text-xs opacity-70">
+                  {currentIndex + 1} / {total}
+                </span>
+              ) : null}
+              <Button size="sm" variant="outline" onClick={handleZoomOut}>
+                <ZoomOut />
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleZoomIn}>
+                <ZoomIn />
+              </Button>
+              <Button size="sm" variant="outline" onClick={handleResetView}>
+                Reset
+              </Button>
+            </div>
           </div>
-        </div>
+       
       </DialogContent>
     </Dialog>
   );
