@@ -33,9 +33,9 @@ const navItems = [
   { label: "La mia libreria", icon: BookCopy, href: "/my-library" },
   { label: "Scopri libri", icon: Compass, href: "/discover" },
   { label: "Autori", icon: Users, href: "/authors" },
-  // { label: "Categorie", icon: Book, href: "/categories" },
-  // { label: "Statistiche lettura", icon: BarChart3, href: "#" },
-  // { label: "Impostazioni", icon: Settings, href: "#" },
+  { label: "Categorie", icon: Book, href: "/categories" },
+  { label: "Statistiche lettura", icon: BarChart3, href: "/stats" },
+  { label: "Impostazioni", icon: Settings, href: "/settings" },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {
