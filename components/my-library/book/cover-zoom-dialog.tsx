@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
-import { ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import {  ZoomIn, ZoomOut } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
@@ -22,12 +22,13 @@ export function CoverZoomDialog({
 }: CoverZoomDialogProps) {
   const total = covers.length;
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [zoomLevel, setZoomLevel] = useState(1);
   const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
-  const currentCover = covers[currentIndex] ?? covers[0];
+  const safeIndex = total === 0 ? 0 : ((currentIndex % total) + total) % total;
+  const currentCover = covers[safeIndex];
+  const thumbnailCovers = covers;
 
   function handleZoomOpenChange(nextOpen: boolean) {
     onOpenChange(nextOpen);
@@ -122,35 +123,6 @@ export function CoverZoomDialog({
     setIsDragging(false);
   }
 
-  function handlePrevious() {
-    if (total <= 1) return;
-    setZoomLevel(1);
-    setPanOffset({ x: 0, y: 0 });
-    setIsDragging(false);
-    setCurrentIndex((prev) => (prev - 1 + total) % total);
-  }
-
-  function handleNext() {
-    if (total <= 1) return;
-    setZoomLevel(1);
-    setPanOffset({ x: 0, y: 0 });
-    setIsDragging(false);
-    setCurrentIndex((prev) => (prev + 1) % total);
-  }
-
-  function handleNavigate(direction: "prev" | "next") {
-    if (total <= 1) return;
-    setIsTransitioning(true);
-    window.setTimeout(() => {
-      if (direction === "prev") {
-        handlePrevious();
-      } else {
-        handleNext();
-      }
-      window.setTimeout(() => setIsTransitioning(false), 150);
-    }, 120);
-  }
-
   return (
     <Dialog open={open} onOpenChange={handleZoomOpenChange}>
       <DialogContent
@@ -172,24 +144,6 @@ export function CoverZoomDialog({
                 zoomLevel > 1 ? (isDragging ? "grabbing" : "grab") : "default",
             }}
           >
-            {total > 1 ? (
-              <>
-                <Button
-                  onClick={() => handleNavigate("prev")}
-                  className="absolute left-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/80 p-2 text-foreground shadow-sm transition-all hover:bg-background hover:-translate-x-1"
-                  aria-label="Immagine precedente"
-                >
-                  <ChevronLeft className="size-5" />
-                </Button>
-                <Button
-                  onClick={() => handleNavigate("next")}
-                  className="absolute right-3 top-1/2 z-10 -translate-y-1/2 rounded-full bg-background/80 p-2 text-foreground shadow-sm transition-all hover:bg-background hover:translate-x-1"
-                  aria-label="Immagine successiva"
-                >
-                  <ChevronRight className="size-5" />
-                </Button>
-              </>
-            ) : null}
             {/* ZOOM LABEL */}
             <div className="absolute left-2 top-2 z-10 rounded-full bg-background/90 px-2 py-0.5 text-xs text-muted-foreground shadow-sm backdrop-blur">
               {zoomLevel.toFixed(1)}x
@@ -202,31 +156,56 @@ export function CoverZoomDialog({
                 transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`,
               }}
             >
-              <Image
-                src={currentCover}
-                alt={`Copertina di ${title}`}
-                fill
-                className={`object-contain transition-opacity duration-200 ${
-                  isTransitioning ? "opacity-0" : "opacity-100"
-                }`}
-                draggable={false}
-                sizes="100vw"
-              />
+              {currentCover ? (
+                <Image
+                  src={currentCover}
+                  alt={`Copertina di ${title}`}
+                  fill
+                  className="object-contain"
+                  draggable={false}
+                  sizes="100vw"
+                />
+              ) : null}
             </div>
           </div>
         </div>
-          {/* CONTROLLI */}
-          <div className="flex items-center justify-between p-3 ">
+        {/* CONTROLLI */}
+        <div className="flex flex-col gap-3 p-3">
+          {total > 1 ? (
+            <div className="flex items-center gap-3 overflow-x-auto pb-1">
+              {thumbnailCovers.map((cover, index) => {
+                const isActive = index === safeIndex;
+                return (
+                  <button
+                    key={`${cover}-${index}`}
+                    type="button"
+                    onClick={() => setCurrentIndex(index)}
+                    className={`relative h-20 w-14 shrink-0 overflow-hidden rounded-lg border transition-all ${
+                      isActive
+                        ? "border-primary ring-2 ring-primary/40"
+                        : "border-muted/70 hover:border-foreground/40"
+                    }`}
+                    aria-label={`Vai alla cover ${index + 1}`}
+                  >
+                    <Image
+                      src={cover}
+                      alt={`Anteprima cover ${index + 1}`}
+                      fill
+                      className="object-cover"
+                      sizes="56px"
+                    />
+                  </button>
+                );
+              })}
+            </div>
+          ) : null}
+
+          <div className="flex items-center justify-between">
             <p className="text-xs opacity-70">
               Usa la rotella per zoomare (1x - 4x)
             </p>
 
             <div className="flex items-center gap-2">
-              {total > 1 ? (
-                <span className="text-xs opacity-70">
-                  {currentIndex + 1} / {total}
-                </span>
-              ) : null}
               <Button size="sm" variant="outline" onClick={handleZoomOut}>
                 <ZoomOut />
               </Button>
@@ -238,7 +217,7 @@ export function CoverZoomDialog({
               </Button>
             </div>
           </div>
-       
+        </div>
       </DialogContent>
     </Dialog>
   );
