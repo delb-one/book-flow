@@ -16,6 +16,7 @@ import type {
 } from "@/components/discover/types";
 import { Button } from "@/components/ui/button";
 import { Grid3X3, List } from "lucide-react";
+import { toast } from "sonner";
 
 const TABLE_PAGE_SIZE = 20;
 const GRID_PAGE_SIZE = 24;
@@ -92,7 +93,6 @@ export default function DiscoverPage() {
         }
 
         if (!cancelled) {
-
           setRecommendation(payload.result);
           setRecommendationReason(
             payload.reason?.message ||
@@ -305,17 +305,33 @@ export default function DiscoverPage() {
       }
 
       setSavedBookIds((prev) => new Set(prev).add(selectedBook.id));
+      if (payload.alreadyInLibrary) {
+        toast.info("Già presente in libreria", {
+          description: selectedBook.title,
+          action: { label: "Chiudi", onClick: () => {} },
+          position: "top-right",
+        });
+      } else {
+        toast.success("Aggiunto alla libreria", {
+          description: selectedBook.title,
+          action: { label: "Chiudi", onClick: () => {} },
+          position: "top-right",
+        });
+      }
       setSelectedBookId(null);
       setStatus("unread");
       setRating(0);
       setNotes("");
       setIsDialogOpen(false);
     } catch (error) {
-      setSaveError(
+      const message =
         error instanceof Error
           ? error.message
-          : "Errore durante il salvataggio.",
-      );
+          : "Errore durante il salvataggio.";
+      setSaveError(message);
+      toast.error("Impossibile aggiungere il libro", {
+        description: message,
+      });
     } finally {
       setIsSaving(false);
     }

@@ -21,6 +21,7 @@ export default async function MyLibraryBookPage({
   const { slug } = await params;
   const books = await getLibraryBooks();
   const book = books.find((item) => slugify(item.title) === slug);
+  
 
   if (!book) {
     notFound();

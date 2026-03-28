@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,10 +43,23 @@ export function CustomCoverUploader({ bookId }: CustomCoverUploaderProps) {
 
       setFiles([]);
       router.refresh();
+      toast.success(
+        files.length > 1
+          ? "Cover personalizzate caricate"
+          : "Cover personalizzata caricata",
+        {
+          action: {
+            label: "Chiudi",
+            onClick: () => {},
+          },
+          position: "top-right",
+        },
+      );
     } catch (error) {
       const message =
         error instanceof Error ? error.message : "Errore imprevisto.";
       setErrorMessage(message);
+      toast.error("Errore nel caricamento cover", { description: message });
     } finally {
       setIsUploading(false);
     }

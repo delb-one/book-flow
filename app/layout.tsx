@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/theme-provider";
 import { AppShell } from "@/components/app-shell";
+import { Toaster } from "@/components/ui/sonner";
 import { JetBrains_Mono, Playfair_Display, Inter } from "next/font/google";
 
 const fontSans = Inter({
@@ -36,6 +37,7 @@ export default function RootLayout({
       >
         <ThemeProvider>
           <AppShell>{children}</AppShell>
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

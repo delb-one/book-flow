@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
 
 import type { LibraryBook, ReadingStatus } from "@/lib/library-data";
 
@@ -33,9 +34,7 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
 
   useEffect(() => {
     setLocalBooks(books);
-    
   }, [books]);
-  
 
   const uniqueCategories = useMemo(
     () => [...new Set(localBooks.flatMap((book) => book.categories))].sort(),
@@ -116,6 +115,7 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return;
+    const removedBook = deleteTarget;
     setIsDeleting(true);
     setDeleteError(null);
 
@@ -135,6 +135,11 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
       setLocalBooks((prev) =>
         prev.filter((book) => book.id !== deleteTarget.id),
       );
+      toast.success("Rimosso dalla wishlist", {
+        description: removedBook.title,
+        action: { label: "Chiudi", onClick: () => {} },
+        position: "top-right",
+      });
       setDeleteTarget(null);
     } catch (error) {
       setDeleteError("Errore di rete durante la rimozione.");
