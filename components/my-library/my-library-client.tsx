@@ -33,7 +33,9 @@ export function MyLibraryClient({ books }: { books: LibraryBook[] }) {
 
   useEffect(() => {
     setLocalBooks(books);
+    
   }, [books]);
+  
 
   const uniqueCategories = useMemo(
     () => [...new Set(localBooks.flatMap((book) => book.categories))].sort(),

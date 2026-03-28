@@ -120,18 +120,47 @@ async function fetchLibraryBooks(): Promise<LibraryBook[]> {
   }
 
   const signedUrlByPath = new Map<string, string>();
+  const coverEntries = Array.from(coverPathsByBook.values()).flat();
+
+  const normalizeCoverPath = (value: string) => {
+    const trimmed = value.trim();
+    if (!trimmed) return "";
+    if (trimmed.startsWith("http://") || trimmed.startsWith("https://")) {
+      return trimmed;
+    }
+    return trimmed.replace(/^\/+/, "");
+  };
+
   await Promise.all(
-    Array.from(coverPathsByBook.values())
-      .flat()
-      .map(async ({ path }) => {
-        if (!path || signedUrlByPath.has(path)) return;
+    coverEntries.map(async ({ path }) => {
+      if (!path || signedUrlByPath.has(path)) return;
+      const normalizedPath = normalizeCoverPath(path);
+      if (!normalizedPath) return;
+
+      if (normalizedPath.startsWith("http")) {
+        signedUrlByPath.set(path, normalizedPath);
+        return;
+      }
+
+      try {
         const { data: signedData } = await supabase.storage
           .from(CUSTOM_COVER_BUCKET)
-          .createSignedUrl(path, CUSTOM_COVER_URL_TTL_SECONDS);
+          .createSignedUrl(normalizedPath, CUSTOM_COVER_URL_TTL_SECONDS);
         if (signedData?.signedUrl) {
           signedUrlByPath.set(path, signedData.signedUrl);
+          return;
         }
-      }),
+      } catch {
+        // Fall back to public URL below.
+      }
+
+      const { data: publicData } = supabase.storage
+        .from(CUSTOM_COVER_BUCKET)
+        .getPublicUrl(normalizedPath);
+      if (publicData?.publicUrl) {
+        signedUrlByPath.set(path, publicData.publicUrl);
+      }
+    }),
   );
 
   return rows
@@ -173,5 +202,10 @@ const getLibraryBooksCached = unstable_cache(fetchLibraryBooks, ["library-books"
 });
 
 export async function getLibraryBooks(): Promise<LibraryBook[]> {
-  return getLibraryBooksCached();
+  try {
+    return await getLibraryBooksCached();
+  } catch (error) {
+    console.error("getLibraryBooks failed:", error);
+    return [];
+  }
 }
